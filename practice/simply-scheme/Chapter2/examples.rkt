@@ -57,5 +57,8 @@
 (appearances 1 1111) ;; 4
 
 #! 2.4:
-#! Domain (when string is second arg): (int > 0, string) indexes into the string, 1 based
-(item 4 'abc)
+#! Domain (when string|int is second arg): (int > 0, string|int) indexes into the string, 1 based
+(item 3 'abc)
+(item 2 1.23)
+
+#! TODO: 2.5-2.9 require analyzing functions from the chapter...
