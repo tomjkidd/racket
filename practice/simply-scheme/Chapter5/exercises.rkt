@@ -107,3 +107,74 @@
 ;;(bl "") ;; Error
 (bl 'a) ;; ""
 (bl '(a)) ;; '()
+
+#! 5.13
+;; ' 'banana stands for quote 'banana, without application
+(first ' 'banana) ;; 'quote, the first argument
+
+#! 5.14
+(define (third x)
+  (first (bf (bf x))))
+
+(third 'abc)
+(third '(word1 word2 word3))
+
+#! 5.15
+(define (first-two x)
+  (word (first x)
+        (first (bf x))))
+
+(first-two 'amulatory)
+
+#! 5.16
+(define (two-first x y)
+  (word (first x) (first y)))
+
+(two-first 'brain 'epstein)
+
+(define (two-first-sent x)
+  (word (first (first x))
+        (first (first (bf x)))))
+
+(two-first-sent '(brian epstein))
+
+#! 5.17
+(define (knight name)
+  (sentence 'sir
+        (first name)
+        (first (bf name))))
+
+(knight '(david wessel))
+
+#! 5.18
+(define (ends word)
+  (word (first word) (last word)))
+
+;; (ends 'john) ;; Error, using word as an argument makes it so that the word function is clobbered in the body.
+
+#! 5.19
+(define (insert-and items)
+  (sentence (bl items)
+            'and
+            (last items)))
+
+(insert-and '(john bill wayne fred joey))
+
+#! 5.20
+(define (middle-names fullname)
+  (bl (bf fullname)))
+
+(middle-names '(james paul mccartney))
+(middle-names '(john ronald raoul tolkien))
+(middle-names '(bugs bunny))
+(middle-names '(peter plair denis bernard noone))
+
+#! 5.21
+(define (query statement)
+  (sentence (first (bf statement))
+            (first statement)
+            (bl (bf (bf statement)))
+            (word (last statement) '?)))
+
+(query '(you are experienced))
+(query '(i should have known better))
