@@ -57,7 +57,7 @@
         (else (+ hour 12))))
 
 (define (american-time hour)
-  (cond ((= hour 0) (sentence 12 'am))
+  (cond ((= hour 24) (sentence 12 'am))
         ((< hour 12) (sentence hour 'am))
         ((= hour 12) (sentence hour 'pm))
         (else (sentence (- hour 12) 'pm))))
