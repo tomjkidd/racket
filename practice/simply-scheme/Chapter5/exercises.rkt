@@ -72,3 +72,38 @@
 #! (you know my name (look up the number)) ;; Nope
 
 #! 5.9
+(se (word (bl (bl (first '(make a)))) ;; 'ma
+          (bf (bf (last '(baseball mitt))))) ;; 'tt
+    (word (first 'with) (bl (bl (bl (bl 'rigidly)))) ;; 'wrig
+          (first 'held) (first (bf 'stitches)))) ;; 'ht -> '(matt wright)
+
+(se (word (bl (bl 'bring)) 'a (last 'clean)) ;; 'brian
+    (word (bl (last '(baseball hat))) (last 'for) (bl (bl 'very)) ;; 'harve
+          (last (first '(sunny days))))) ;; y -> '(brian harvey)
+
+#! 5.10
+(bf 'wright)
+(bf '(this is a sentence that returns a sentence))
+
+#! 5.11
+(last '(this is a sentence where last is a word))
+(last '('(last here) '(is a sentence)))
+
+#! 5.12
+;;(first '()) ;; Error
+;;(first "") ;; Error
+
+;;(last '()) ;; Error
+;;(last "") ;; Error
+(last 'a) ;; 'a 
+(last '(a)) ;; 'a
+
+;;(bf '()) ;; Error
+;;(bf "") ;; Error
+(bf 'a) ;; ""
+(bf '(a)) ;; '()
+
+;;(bl '()) ;; Error
+;;(bl "") ;; Error
+(bl 'a) ;; ""
+(bl '(a)) ;; '()
