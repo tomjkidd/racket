@@ -217,3 +217,86 @@ repeated
 (letter-count '(abc))
 (letter-count '(abc def))
 (letter-count '(fixing a hole))
+
+#! 8.8
+(define (exaggerate-word wd)
+  (cond ((number? wd) (* 2 wd))
+        ((equal? 'good wd) 'great)
+        ((equal? 'bad wd) 'terrible)
+        (else wd)))
+(define (exaggerate sent)
+  (every exaggerate-word sent))
+
+(exaggerate-word 3)
+(exaggerate-word 'good)
+(exaggerate '(i ate 3 potstickers))
+(exaggerate '(the chow fun is good here))
+
+#! 8.9
+(define example-sentence '(all words should be unchanged))
+
+(define (every-identity sent)
+  (every word sent))
+(every-identity example-sentence)
+
+(define (keep-identity sent)
+  (keep word? sent))
+(keep-identity example-sentence)
+
+(define (accumulate-identity sent)
+  (accumulate sentence sent))
+(accumulate-identity example-sentence)
+
+#! 8.10
+(define (true-for-all? pred sent)
+  ;; Solution from https://github.com/buntine/Simply-Scheme-Exercises
+  (= (count sent) (count (keep pred sent))))
+;; TODO: Find out why this doesn't work...
+;; Look at how every is implemented
+;; http://planet.racket-lang.org/package-source/dyoo/simply-scheme.plt/2/2/simply-scheme.rkt
+;;(and (every first sent)))
+(true-for-all? even? '(2 4 6 8))
+(true-for-all? even? '(2 6 3 4))
+
+#! 8.11
+(define (base-grade grade)
+  (let ((grade-letter (first grade)))
+    (cond ((equal? grade-letter 'A) 4)
+          ((equal? grade-letter 'B) 3)
+          ((equal? grade-letter 'C) 2)
+          ((equal? grade-letter 'D) 1)
+          (else 0))))
+(define (grade-modifier grade)
+  (let ((modifier (if (equal? (bf grade) "")
+                      ""
+                      (first (bf grade)))))
+    (cond ((equal? modifier '+) 0.33)
+          ((equal? modifier '-) -0.33)
+          (else 0))))
+(base-grade 'A)
+(base-grade 'F)
+(grade-modifier 'A+)
+(grade-modifier 'A)
+(grade-modifier 'A-)
+
+(define (single-gpa grade)
+  (+ (base-grade grade) (grade-modifier grade)))
+
+(single-gpa 'A+)
+(single-gpa 'A)
+(single-gpa 'A-)
+
+(define (gpa grades)
+  (/ (accumulate + (every single-gpa grades)) (count grades)))
+
+;; TODO: Create an arbitrary round procedure...
+(gpa '(A A+ B+ B))
+
+#! 8.12
+(define (count-ums sent)
+  (accumulate +
+              (every
+               (lambda (x) 1)
+               (keep (lambda (x) (equal? x 'um)) sent))))
+
+(count-ums '(today um we are going to um talk about functional um programming))
