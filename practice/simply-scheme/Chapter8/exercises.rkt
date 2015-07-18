@@ -139,9 +139,81 @@ repeated
 ;; (even-twice 2) ;; Error: even? returns a boolean, and then you try to apply even? to a bool, which is a contract violation.
 
 (define first-twice (repeated first 2))
-(first-twice '(abc def ghi)) ;; 'a, when called on a sentence, first word of first sentence
-(first-twice 'abc) ;; 'a, when called on a word, redundant call to first
+(first-twice (list '(abc def ghi) '(abc def ghi))) ;; Didn't technically introduce list, but I wanted to try this one out.
+(first-twice '(abc def ghi)) ;; 'a, when called on a sentence, first letter of first word
+(first-twice 'abc) ;; 'a, when called on a word, redundant call to first letter
 
 (define skip-six (repeated (repeated bf 3) 2))
 (skip-six 'abcdefghijkl) ;; 'ghijkl, skips the first six letters
 (skip-six '(abc def ghi jkl mno pqr stu vwx yz)) ;; '(stu vwx yz), skips the first 6 words
+
+#! 8.4 -> This is a filter opertion.
+(define beatles '(john paul george ringo))
+
+(define (choose-beatles pred)
+  (keep pred beatles))
+
+(define (ends-vowel? wd) (vowel? (last wd)))
+(define (even-count? wd) (even? (count wd)))
+
+(choose-beatles ends-vowel?)
+(choose-beatles even-count?)
+
+#! 8.5 -> This is a map operation
+(define (transform-beatles transform)
+  (every transform beatles))
+
+(define (amazify name)
+  (word 'the-amazing- name))
+
+(transform-beatles amazify)
+(transform-beatles butfirst)
+
+#! 8.6
+(define (to-nato-phonetic letter) 
+  (let ((letter-equal-to? (lambda (x) (equal? letter x))))
+    (cond ((letter-equal-to? 'a) 'alpha)
+          ((letter-equal-to? 'b) 'bravo)
+          ((letter-equal-to? 'c) 'charlie)
+          ((letter-equal-to? 'd) 'delta)
+          ((letter-equal-to? 'e) 'echo)
+          ((letter-equal-to? 'f) 'foxtrot)
+          ((letter-equal-to? 'g) 'golf)
+          ((letter-equal-to? 'h) 'hotel)
+          ((letter-equal-to? 'i) 'india)
+          ((letter-equal-to? 'j) 'juliet)
+          ((letter-equal-to? 'k) 'kilo)
+          ((letter-equal-to? 'l) 'lima)
+          ((letter-equal-to? 'm) 'mike)
+          ((letter-equal-to? 'n) 'november)
+          ((letter-equal-to? 'o) 'oscar)
+          ((letter-equal-to? 'p) 'papa)
+          ((letter-equal-to? 'q) 'quebec)
+          ((letter-equal-to? 'r) 'romeo)
+          ((letter-equal-to? 's) 'sierra)
+          ((letter-equal-to? 't) 'tango)
+          ((letter-equal-to? 'u) 'uniform)
+          ((letter-equal-to? 'v) 'victor)
+          ((letter-equal-to? 'w) 'whiskey)
+          ((letter-equal-to? 'x) 'xray)
+          ((letter-equal-to? 'y) 'yankee)
+          ((letter-equal-to? 'z) 'zulu))))
+
+(define (words wd)
+  (every (lambda (x) (every to-nato-phonetic x)) wd))
+
+(to-nato-phonetic 'a)
+(to-nato-phonetic 'b)
+(words '(tom))
+(words '(kidd))
+
+#! 8.7
+(define (letter-count-word word)
+  (every (lambda (x) 1) word))
+
+(define (letter-count sent)
+  (accumulate + (every letter-count-word sent)))
+
+(letter-count '(abc))
+(letter-count '(abc def))
+(letter-count '(fixing a hole))
