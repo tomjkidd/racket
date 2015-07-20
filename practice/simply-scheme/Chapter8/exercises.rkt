@@ -293,10 +293,52 @@ repeated
 (gpa '(A A+ B+ B))
 
 #! 8.12
+(define (equals-um? wd)
+  (equal? wd 'um))
+(define (always-1 x)
+  1)
 (define (count-ums sent)
-  (accumulate +
-              (every
-               (lambda (x) 1)
-               (keep (lambda (x) (equal? x 'um)) sent))))
+  (accumulate + (every always-1 (keep equals-um? sent))))
+
+(define (count-ums2 sent)
+  (count (keep equals-um? sent)))
 
 (count-ums '(today um we are going to um talk about functional um programming))
+
+#! 8.13
+;; Using https://en.wikipedia.org/wiki/Telephone_keypad
+(define (unspell-letter letter)
+  (cond ((member? letter '(a b c)) 2)
+        ((member? letter '(d e f)) 3)
+        ((member? letter '(g h i)) 4)
+        ((member? letter '(j k l)) 5)
+        ((member? letter '(m n o)) 6)
+        ((member? letter '(p q r s)) 7)
+        ((member? letter '(t u v)) 8)
+        ((member? letter '(w x y z)) 9)))
+
+(define (phone-unspell wd)
+  (accumulate word (every unspell-letter wd)))
+
+(phone-unspell 'popcorn)
+
+#! 8.14
+;; TODO: Research into ways other people have solved this, feels like the way I did it is pretty involved
+(define (next x)
+  (+ x 1))
+(define (build from to current)
+  (if (> from to)
+      current
+      (build (next from) to (se current from))))
+
+(build 5 8 '())
+
+(define (subword wd start-pos end-pos)
+  (define (in-between x)
+    (and (>= x start-pos) (<= x end-pos)))
+  (define (letter-at x)
+    (item x wd))
+  (accumulate word (every letter-at (build start-pos end-pos '()))))
+
+(subword 'polythene 5 8)
+
