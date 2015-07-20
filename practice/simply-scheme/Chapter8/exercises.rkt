@@ -342,3 +342,25 @@ repeated
 
 (subword 'polythene 5 8)
 
+#! A second, more direct way to implement subword
+(define (take n wd)
+  (define (take-rec n wd accum)
+    (if (= n 0)
+        accum
+        (take-rec (- n 1) (bf wd) (word accum (first wd)))))
+  (take-rec n wd ""))
+
+(define (drop n wd)
+  (if (= n 0)
+      wd
+      (drop (- n 1) (bf wd))))
+
+(define (subword2 wd start-pos end-pos)
+  (let ((number-to-drop (- start-pos 1))
+        (number-to-take (- (+ end-pos 1) start-pos)))
+    (take number-to-take (drop number-to-drop wd))))
+
+(subword2 'testing 1 2)
+(subword2 'testing 1 7)
+(subword2 'testing 2 5)
+(subword2 'polythene 5 8)
