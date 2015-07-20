@@ -6,7 +6,7 @@ Hand is 13 cards
 
 A: 4 pts
 K: 3 pts
-Q: 3 pts
+Q: 2 pts
 J: 1 pt
 
 Distribution Points:
