@@ -6,5 +6,3 @@ Terms
 Notes
 -----
 * High level design, ignoring arguments, was how the first version was presented.
-* Second
-* Third
