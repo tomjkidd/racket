@@ -114,3 +114,29 @@
       (word (unspell-letter (first wd)) (phone-unspell (bf wd)))))
 
 (phone-unspell 'popcorn)
+
+#! 11.4 "Use what you have to get what you need" -> MacGyver?
+
+#! 11.5
+(define (initials sent)
+  (if (= (count sent) 0)
+      '()
+      (se (first (first sent)) (initials (bf sent)))))
+(initials '(if i needed someone))
+
+#! 11.6
+(define (countdown num)
+  (if (= num 0)
+      'blastoff!
+      (se num (countdown (- num 1)))))
+
+(countdown 10)
+(countdown 3)
+
+#! 11.7
+(define (copies num wd)
+  (if (<= num 0)
+      '()
+      (se wd (copies (- num 1) wd))))
+
+(copies 8 'spam)

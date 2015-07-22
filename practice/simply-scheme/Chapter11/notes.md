@@ -7,6 +7,3 @@ Terms
 
 Notes
 -----
-* First
-* Second
-* Third
