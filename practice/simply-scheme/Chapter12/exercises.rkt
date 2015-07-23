@@ -67,11 +67,6 @@ make the product 0, which is wrong. |#
           ((equal? modifier '-) -0.33)
           (else 0))))
 
-(define (one-when-not-empty x)
-  (if (equal? x 0)
-      0
-      1))
-
 (define (grade-sum grades)
   (if (empty? grades)
       0
