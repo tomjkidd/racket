@@ -77,3 +77,77 @@
 
 (trace differences)
 (differences '(4 23 9 87 6 12))
+
+#! 14.8
+(define (expand-mod sent)
+  (if (empty? sent)
+      '()
+      (if (>= (count sent) 2)
+          (if (number? (first sent))
+              (se (repeat (first sent) (first (bf sent)))
+                  (expand-mod (bf sent)))
+              (se (first sent)
+                  (expand-mod (bf sent))))
+          sent)))
+          
+(define (repeat num-times wd)
+  (if (> num-times 1)
+      (se wd
+          (repeat (- num-times 1) wd))
+      '()))
+
+(trace expand-mod)
+(expand-mod '(4 calling birds 3 french hens))
+(expand-mod '(the 7 samurai))
+
+#! 14.9
+(define (location-helper index wd sent)
+  (if (empty? sent)
+      #f
+      (if (equal? wd (first sent))
+          index
+          (location-helper (+ index 1) wd (bf sent)))))
+
+(define (location wd sent)
+  (location-helper 1 wd sent))
+
+(location 'you '(you never give me your money))
+(location 'never '(you never give me your money))
+(location 'give '(you never give me your money))
+(location 'me '(you never give me your money))
+(location 'your '(you never give me your money))
+(location 'money '(you never give me your money))
+(location 'bull '(you never give me your money))
+
+#! 14.10
+(define (count-adjacent-duplicates sent)
+  (cond ((< (count sent) 2) 0)
+        ((>= (count sent) 2) (if (equal? (first sent) (first (bf sent)))
+                                 (+ 1 (count-adjacent-duplicates (bf sent)))
+                                 (count-adjacent-duplicates (bf sent))))))
+
+(trace count-adjacent-duplicates)
+(count-adjacent-duplicates '(y a b b a d a b b a d o o))
+(count-adjacent-duplicates '(yeah yeah yeah))
+
+#! 14.11
+(define (remove-adjacent-duplicates sent)
+  (cond ((< (count sent) 0) '())
+        ((= (count sent) 1) sent)
+        ((>= (count sent) 2) (if (equal? (first sent) (first (bf sent)))
+                                 (remove-adjacent-duplicates (bf sent))
+                                 (se (first sent) (remove-adjacent-duplicates (bf sent)))))))
+
+(trace remove-adjacent-duplicates)
+(remove-adjacent-duplicates '(y a b b a d a b b a d o o))
+(remove-adjacent-duplicates '(yeah yeah yeah))
+
+#! 14.12
+(define (square x) (* x x))
+(define (progressive-squares? sent)
+  (cond ((<= (count sent) 1) #t)
+        ((> (count sent) 2) (if (equal? (square (first sent)) (first (bf sent)))
+                                #t
+                                #f))))
+(progressive-squares? '(3 9 81 6561))
+(progressive-squares? '(25 36 49 64))
