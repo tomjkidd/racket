@@ -149,5 +149,97 @@
         ((> (count sent) 2) (if (equal? (square (first sent)) (first (bf sent)))
                                 #t
                                 #f))))
+
 (progressive-squares? '(3 9 81 6561))
 (progressive-squares? '(25 36 49 64))
+
+#! 14.13
+(define (pigl-helper index wd)
+  (if (>= index (count wd))
+      (word wd 'ay)
+      (if (member? (first wd) 'aeiou)
+          (word wd 'ay)
+          (pigl-helper (+ index 1) (word (bf wd) (first wd))))))
+      
+(define (pigl wd)
+  (pigl-helper 0 wd))
+
+(trace pigl-helper)
+(pigl 'frzzmlpt)
+
+#! 14.14
+(define (same-shape? sent-a sent-b)
+  (cond ((not (= (count sent-a) (count sent-b))) #f)
+        ((or (= (count sent-a) 0) (= (count sent-b) 0)) #f)
+        ((= (count sent-a) 1) (= (count sent-a) (count sent-b)))
+        (else (and (= (count (first sent-a)) (count (first sent-b)))
+                   (same-shape? (bf sent-a) (bf sent-b))))))
+
+(same-shape? '(the fool on the hill) '(you like me too much))
+(same-shape? '(the fool on the hill) '(and your bird can sing))
+
+#! 14.15
+(define (merge sent-a sent-b)
+  (cond ((empty? sent-a) sent-b)
+        ((empty? sent-b) sent-a)
+        (else (let ((first-a (first sent-a))
+                    (first-b (first sent-b)))
+                (if (<= first-a first-b)
+                    ;; Take from a, and merge (butfirst a) with b
+                    (se first-a
+                        (merge (bf sent-a)
+                               sent-b))
+                    ;; Take from b, and merge (butfirst b) with a
+                    (se first-b
+                        (merge sent-a
+                               (bf sent-b))))))))
+;;(trace merge)
+(merge '(4 7 18 40 99) '( 3 6 9 12 24 36 50))
+
+#! 14.16
+#|
+number of syllables = number of vowels, except consecutive vowels count as 1
+|#
+(define (vowel? x) (member? x '(a e i o u y)))
+
+(define (count-while fn xs)
+  (cond ((empty? xs) 0)
+        (else (if (fn (first xs))
+                  (+ 1 (count-while fn (bf xs)))
+                  0))))
+
+(define (drop-while fn xs)
+  (cond ((empty? xs) '())
+        (else (if (fn (first xs))
+                  (drop-while fn (bf xs))
+                  xs))))
+
+;;(trace count-while)
+;;(trace drop-while)
+
+(count-while vowel? '())
+(count-while vowel? '(b c d))
+(count-while vowel? '(a b a))
+(count-while vowel? '(b c a))
+(count-while vowel? '(a e i o u y z))
+
+(drop-while vowel? '())
+(drop-while vowel? '(b c d))
+(drop-while vowel? '(a b a))
+(drop-while vowel? '(b c a))
+(drop-while vowel? '(a e i o u y z))
+      
+(define (syllables wd)
+  (cond ((empty? wd) 0)
+        (else (let ((vowel-count (count-while vowel? wd))
+                    (rest (drop-while vowel? wd)))
+                (if (> vowel-count 0)
+                    (+ 1 (syllables rest))
+                    (syllables (bf rest)))))))
+
+(syllables 'very)
+(syllables 'watermelon)
+(syllables 'teach)
+(syllables 'bingo)
+(syllables 'shampoo)
+(syllables 'shoooes)
