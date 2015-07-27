@@ -97,3 +97,75 @@ brat -> (se (subsets rat) '(b br ba bt bra brt bat brat))
 
 (prepend-every 'b (subsets 'rat))
 (subsets 'brat)
+
+#! 15.1
+(define (max-power-of-two index num)
+  (if (>= (- (expt 2 index) 1) num)
+      index
+      (max-power-of-two (+ index 1) num)))
+
+(trace max-power-of-two)
+(max-power-of-two 0 64)
+
+(define (to-binary-helper index num)
+  (cond ((< index 0) "")
+        (else (let ((remaining (remainder num (expt 2 index))))
+          (word (quotient num (expt 2 index))
+              (to-binary-helper (- index 1) remaining))))))
+
+(define (to-binary num)
+  (to-binary-helper (- (max-power-of-two 0 num) 1) num))
+
+(trace to-binary-helper)
+(every to-binary '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16))
+(to-binary 9)
+(to-binary 23)
+
+#! 15.2
+#| The idea for solving this one is to first combine all the words together,
+and then to check that the resulting large word is a palindrome.
+|#
+(define (palindrome-word? wd)
+  (cond ((empty? wd) #t)
+        ((= (count wd) 1) #t)
+        (else (and (equal? (first wd) (last wd)) (palindrome-word? (bl (bf wd)))))))
+
+(define (palindrome? sent)
+  (palindrome-word? (accumulate word sent)))
+
+(palindrome-word? 'amanaplanacanalpanama)
+(palindrome-word? 'abc)
+
+(palindrome? '(flee to me remote elf))
+(palindrome? '(flee to me remote control))
+
+#! 15.3
+#|
+bat -> b ba bat at t
+|#
+(define (substrings-helper wd)
+  (cond ((empty? wd) wd)
+        ((= (count wd) 1) wd)
+        (else (se (substrings-helper (bf wd))
+                  wd
+                  (substrings-helper (bl wd))))))
+
+(define (remdup-rec encountered sent)
+  (cond ((empty? sent) encountered)
+        ((member? (first sent) encountered) (remdup-rec encountered (bf sent)))
+        (else (remdup-rec (se encountered (first sent)) (bf sent)))))
+           
+(define (remdup sent)
+  (remdup-rec '() sent))
+
+(define (substrings wd)
+  (remdup (substrings-helper wd)))
+
+(substrings 'bat)
+
+#! 15.4
+(define (substring? needle haystack)
+  (member? needle (substrings haystack)))
+
+(substring? 'ssip 'mississippi)
+(substring? 'misip 'mississippi)
