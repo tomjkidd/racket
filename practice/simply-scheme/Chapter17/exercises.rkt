@@ -174,3 +174,50 @@
       (+ 1 (length-mod (cdr lst)))))
 
 (length-mod '(1 2 3))
+
+#! 17.11
+(define (before-in-list? lst x y)
+  (cond ((null? lst) #f)
+        ((equal? (car lst) x) #t)
+        ((equal? (car lst) y) #f)
+        (else (before-in-list? (cdr lst) x y))))
+
+(before-in-list? '(back in the ussr) 'in 'ussr)
+(before-in-list? '(back in the ussr) 'the 'back)
+(before-in-list? '(back in the ussr) 'butter 'frisbee)
+
+#! 17.12
+(define (flatten structure)
+  (cond ((null? structure) '())
+        ((word? structure) structure)
+        ((list? structure) (se (flatten (car structure))
+                                   (flatten (cdr structure))))))
+;;(trace flatten)
+
+(flatten '(((a b) c (d e)) (f g) ((((h))) (i j) k)))
+
+#! 17.13
+(define (deep-count lst)
+  (cond ((null? lst) 0)
+        ((word? (car lst)) (+ 1 (deep-count (cdr lst))))
+        (else (+ (deep-count (car lst))
+                 (deep-count (cdr lst))))))
+
+(define (deep-count-simpler lst)
+  (cond ((null? lst) 0)
+        ((word? lst) 1)
+        (else (+ (deep-count-simpler (car lst))
+                 (deep-count-simpler (cdr lst))))))
+
+(deep-count '(((a b) c (d e)) (f g) ((((h))) (i j) k)))
+(deep-count-simpler '(((a b) c (d e)) (f g) ((((h))) (i j) k)))
+
+#! 17.14
+(define (branch lst-num structure)
+  (cond ((null? lst-num) structure)
+        ((list? lst-num) (branch (cdr lst-num)
+                                 (list-ref structure (- (car lst-num) 1))))))
+;;(trace branch)
+(branch '(3) '((a b) (c d) (e f) (g h)))
+(branch '(3 2) '((a b) (c d) (e f) (g h)))
+(branch '(2 3 1 2) '((a b) ((c d) (e f) ((g h) (i j)) k) (l m)))
