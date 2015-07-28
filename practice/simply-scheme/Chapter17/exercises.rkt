@@ -73,3 +73,104 @@
 ;; The first adds one to the argument
 ;; The second adds two to the argument
 ;; The third adds three, fourth adds four.
+
+#! 17.4
+(define (mystery lst)
+  (mystery-helper lst '()))
+
+(define (mystery-helper lst other)
+  (if (null? lst)
+      other
+      (mystery-helper (cdr lst) (cons (car lst) other))))
+
+(mystery '(a b c d e f)) ;; '(f e d c b a), reverses the list
+
+#! 17.5
+(define (max2 a b)
+  (if (> b a) b a))
+
+(define (max-mod number . rest)
+  (cond ((null? rest) number)
+        (else (apply max-mod (cons (max2 number (car rest))
+                                   (cdr rest))))))
+
+(max-mod 1 2 5 4 3)
+
+#! 17.6
+(define reverse-mod mystery)
+
+(define (append-helper lst-a lst-b)
+  (cond ((null? lst-a) lst-b)
+        (else (append-helper (cdr lst-a) (cons (car lst-a) lst-b)))))
+
+(define (append-2 lst-a lst-b)
+  (append-helper (reverse lst-a) lst-b))
+
+(reverse '(a b c))
+
+(trace append-helper)
+
+(append-2 '(a b c) '(d e f))
+
+#! 17.7
+(define (sentence-2 a b)
+  (append (if (word? a)
+              (list a)
+              a)
+          (if (word? b)
+              (list b)
+              b)))
+
+(define (sentence-mod a . rest)
+  (append (if (word? a)
+              (list a)
+              a)
+          (cond ((null? rest) '())
+                ((word? rest) rest)
+                (else (apply sentence-mod rest)))))
+;; The existence of apply makes it so that you don't have to work out the details of
+;; if rest is null, a word, or list in the recursive case, you can simply pass it
+;; forward with another recursive call. Nice.
+
+(sentence-2 '(a b) '(c d))
+(sentence-2 'a '(b c d))
+(sentence-2 '(a b c) 'd)
+(sentence-2 'ab 'cd)
+
+(sentence-mod 'a)
+(sentence-mod '(a))
+(sentence-mod '(a b) '(c d))
+(sentence-mod 'a '(b c d))
+(sentence-mod '(a b c) 'd)
+(sentence-mod 'ab 'cd)
+(sentence-mod '(a b) '(c d) 'e)
+(sentence-mod '(a b) '(c d) '(e f))
+
+#! 17.8
+(define (member-mod needle haystack)
+  (if (null? haystack)
+      #f
+      (if (equal? needle (car haystack))
+          haystack
+          (member-mod needle (cdr haystack)))))
+
+(member-mod 'my '(i lost my phone in the pool))
+(member-mod 'phone '(i lost the bike over a cliff))
+
+#! 17.9
+(define (list-ref-mod lst index)
+  (if (= index 0)
+      (car lst)
+      (list-ref-mod (cdr lst) (- index 1))))
+
+(list-ref-mod '(a b c) 0)
+(list-ref-mod '(a b c) 1)
+(list-ref-mod '(a b c) 2)
+
+#! 17.10
+(define (length-mod lst)
+  (if (null? lst)
+      0
+      (+ 1 (length-mod (cdr lst)))))
+
+(length-mod '(1 2 3))

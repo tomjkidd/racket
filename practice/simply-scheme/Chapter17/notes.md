@@ -25,7 +25,7 @@ Notes
 * list?
 * equal?
 * member? only works for words and sentences -> member, second arg is a list, and returns portion of list that matches.
-* item -> list-ref
+* item -> list-ref. (list-ref <list> <zero-based-index)
 * count -> length
 * (assoc <name> <name-list) used for association lists
 * . used for taking a variable number of arguments
