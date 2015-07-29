@@ -144,3 +144,69 @@ Each element is:
         (else (error "no such operator as" oper))))
 
 (compute (parse '(4 + 3 * 7 - 5 / (3 + 4) + 6)))
+
+#! 18.1
+(locate '(san francisco) world-tree)
+;; ((san francisco)) is a list where the first element is a list of two words
+
+#! 18.2
+(define (make-node-mod datum children)
+  (list datum children))
+#|
+ If list is used instead of cons:
+ datum: you access datum the same way, (car node)
+ children: you can no longer access children
+ as (cdr node), it would have to be (cadr node)
+|#
+(define (datum-mod node)
+  (car node))
+
+(define (children-mod node)
+  (cadr node))
+
+(define node-a (make-node-mod 'datum '(a b c)))
+
+(datum-mod node-a)
+(children-mod node-a)
+
+#! 18.3
+(define (depth tree)
+  (cond ((leaf? tree) 1)
+        (else (+ 1 (depth-of-forest (children tree))))))
+
+(define (depth-of-forest forest)
+  (cond ((null? forest) 0)
+        (else (max (depth (car forest))
+                   (depth-of-forest (cdr forest))))))
+
+(trace depth)
+(trace depth-of-forest)
+
+(define tree-a (make-node 'a '()))
+(define tree-b (make-node 'a (list (make-node 'b '())
+                           (make-node 'c '()))))
+(define tree-c (make-node 'a (list (make-node 'b (list (make-node 'd '())))
+                           (make-node 'c '()))))
+
+(depth tree-a)
+(depth tree-b)
+(depth tree-c)
+(untrace depth)
+(untrace depth-of-forest)
+(depth world-tree)
+
+#! 18.4
+(define (count-nodes tree)
+  ;; Count all nodes (not just leaves)
+  (cond ((null? tree) 0)
+        (else (+ 1 (count-nodes-in-forest (children tree))))))
+
+(define (count-nodes-in-forest forest)
+  (cond ((null? forest) 0)
+        (else (+ (count-nodes (car forest))
+                 (count-nodes-in-forest (cdr forest))))))
+
+(count-nodes tree-a)
+(count-nodes tree-b)
+(count-nodes tree-c)
+(count-nodes world-tree)
