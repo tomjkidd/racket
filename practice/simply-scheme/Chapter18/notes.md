@@ -12,6 +12,8 @@ Terms
 (shallow: a short tree)
 (deep: a tall tree)
 (tree recursion: any situation in which a procedure invocation results in more than one recursive call, even if there isn't an argument that's a tree)
+(respecting the data abstraction: using the appropriate selectors and constructors that don't access the low-level representation of an abstract data type)
+(data abstraction violation: failing to use the appropriate selectors and constructors)
 
 Notes
 -----
