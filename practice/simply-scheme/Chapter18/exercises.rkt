@@ -184,9 +184,9 @@ Each element is:
 
 (define tree-a (make-node 'a '()))
 (define tree-b (make-node 'a (list (make-node 'b '())
-                           (make-node 'c '()))))
+                                   (make-node 'c '()))))
 (define tree-c (make-node 'a (list (make-node 'b (list (make-node 'd '())))
-                           (make-node 'c '()))))
+                                   (make-node 'c '()))))
 
 (depth tree-a)
 (depth tree-b)
@@ -210,3 +210,29 @@ Each element is:
 (count-nodes tree-b)
 (count-nodes tree-c)
 (count-nodes world-tree)
+
+#! 18.5
+(define (prune tree)
+  (cond ((leaf? tree) #f)
+        (else (make-node (datum tree) (prune-forest (children tree))))))
+
+(define (prune-forest forest)
+  (cond ((null? forest) '())
+        (else (filter (lambda (child) child) (cons (prune (car forest))
+                    (prune-forest (cdr forest)))))))
+
+tree-a
+(prune tree-a)
+
+tree-b
+(prune tree-b)
+
+tree-c
+(prune tree-c)
+
+(prune world-tree)
+
+(datum (caddr (cadr (children world-tree))))
+(children (caddr (cadr (children world-tree))))
+
+
