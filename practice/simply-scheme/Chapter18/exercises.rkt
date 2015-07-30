@@ -143,6 +143,8 @@ Each element is:
         ((equal? oper '/) /)
         (else (error "no such operator as" oper))))
 
+(parse '(4 + 3 * 7 - 5 / (3 + 4) + 6))
+
 (compute (parse '(4 + 3 * 7 - 5 / (3 + 4) + 6)))
 
 #! 18.1
@@ -235,4 +237,50 @@ tree-c
 (datum (caddr (cadr (children world-tree))))
 (children (caddr (cadr (children world-tree))))
 
+#! 18.6
+(define (operator? x)
+  (member? x '(+ - * /)))
 
+(define (parse-scheme expr)
+  (parse-scheme-helper expr '() '()))
+
+(define (parse-scheme-helper expr operators operands)
+  (cond ((null? expr) (cond ((null? operators) (make-node operands '()))
+                            ((not (null? operators)) (make-node (car operators)
+                                                                (map (lambda (operand)
+                                                                       (parse-scheme operand))
+                                                                     (reverse operands))))))
+        ((number? expr) (make-node expr '())) ;; Create a node with no children for a number
+        ((list? (car expr))
+         (parse-scheme-helper (cdr expr) ;; Move a list to the operands list
+                              operators
+                              (cons (car expr) operands)))
+        ((operator? (car expr))
+         (parse-scheme-helper (cdr expr) ;; Move an operator to the operators list
+                              (cons (car expr) operators)
+                              '()))
+        ((number? (car expr))
+         (parse-scheme-helper (cdr expr) ;; Move a number ot the operands list
+                              operators
+                              (cons (car expr) operands)))
+        (else #f)))
+
+(define (compute-mod tree)
+  (if (number? (datum tree))
+      (datum tree)
+      (apply (function-named-by (datum tree))
+             (map compute-mod (children tree)))))
+                                  
+(define expression-a '(+ 4 3))         
+(define expression-b '(* (+ 4 3) 2))
+(define expression-c '(+ (* 3 (+ 2 (* 2 1))) (/ (* 8 2) 2)))
+(define expression-d '(+ 1 2 3 4))
+
+;;(trace operator?)
+;;(trace parse-scheme-helper)
+;;(trace parse-scheme)
+
+(compute-mod (parse-scheme expression-a))
+(compute-mod (parse-scheme expression-b))
+(compute-mod (parse-scheme expression-c))
+(compute-mod (parse-scheme expression-d))
