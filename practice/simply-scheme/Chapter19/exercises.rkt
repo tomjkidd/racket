@@ -134,3 +134,14 @@
 (trace left-accumulate-helper)
 (trace left-accumulate)
 (left-accumulate - '(2 3 4 5))
+
+#! 19.5
+(define (true-for-all? fn lst)
+  (cond ((empty? lst) #t)
+        ((fn (car lst)) (true-for-all? fn (cdr lst)))
+        (else #f)))
+
+(true-for-all? even? '(2 4 6 8))
+(true-for-all? even? '(2 6 3 4))
+                  
+        
