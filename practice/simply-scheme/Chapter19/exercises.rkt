@@ -143,5 +143,16 @@
 
 (true-for-all? even? '(2 4 6 8))
 (true-for-all? even? '(2 6 3 4))
+
+#! 19.6
+(define (true-for-any-pair? pred sent)
+  (cond ((empty? (bf sent)) #f)
+        (else (if (pred (first sent) (first (bf sent)))
+                  #t
+                  (true-for-any-pair? pred (bf sent))))))
+
+(true-for-any-pair? equal? '(a b c b a))
+(true-for-any-pair? equal? '(a b c c d))
+(true-for-any-pair? < '(20 16 5 8 6))
                   
         
