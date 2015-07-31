@@ -103,22 +103,34 @@
 
 #! 19.4
 (define (accumulate-mod combiner stuff)
-  (cond ((not (empty? stuff)) (real-accumulate combiner stuff))
-        ((member combiner (list + * word se append))
-         (combiner))
-        (else (error
-               "Can't accumulate empty input with that combiner"))))
-
-(define (real-accumulate combiner stuff)
   (if (empty? (bf stuff))
       (first stuff)
-      (combiner (first stuff) (real-accumulate combiner (bf stuff)))))
+      (combiner (first stuff) (accumulate-mod combiner (bf stuff)))))
 
+(trace accumulate-mod)
 (accumulate-mod - '(2 3 4 5))
 
-;; TODO: Actually implement this...
+(define (left-accumulate-helper combiner temp stuff)
+  (cond ((empty? stuff) (if (empty? temp)
+                            #f
+                            (car temp))) ;; Access the value from the accumulator.
+        ;; temp is used as a container for the running result.
+        ;; When temp is empty, populate it with the head of the list.
+        ((empty? temp) (left-accumulate-helper combiner
+                                               (cons (first stuff) temp)
+                                               (bf stuff)))
+        ;; When temp has a value, use combiner with head of the list to get new accumulator.
+        ((= (length temp) 1) (left-accumulate-helper combiner
+                                                     (list (combiner (first temp) (first stuff)))
+                                                     (bf stuff)))))
+
 (define (left-accumulate combiner stuff)
-  (accumulate-mod combiner stuff))
+  (left-accumulate-helper combiner '() stuff))
 
+;; Including this because I discovered that it also works.
+(define (left-accumulate-har-har combiner stuff)
+  (apply combiner stuff))
+
+(trace left-accumulate-helper)
+(trace left-accumulate)
 (left-accumulate - '(2 3 4 5))
-
