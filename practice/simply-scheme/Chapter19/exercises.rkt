@@ -155,4 +155,111 @@
 (true-for-any-pair? equal? '(a b c c d))
 (true-for-any-pair? < '(20 16 5 8 6))
                   
-        
+#! 19.7
+(define (true-for-all-pairs? pred sent)
+  (cond ((empty? (bf sent)) #t)
+        (else (and (pred (first sent) (first (bf sent)))
+                   (true-for-all-pairs? pred (bf sent))))))
+'(tests for 19.7)
+(true-for-all-pairs? equal? '(a b c c d))
+(true-for-all-pairs? equal? '(a a a a a))
+(true-for-all-pairs? < '(20 16 5 8 6))
+(true-for-all-pairs? < '(3 7 19 22 43))
+
+#! 19.8
+(define (true-for-all-pairs-non-recursive? pred sent)
+  ;; By reversing the predicate, we can return if the predicate is false for any pair.
+  ;; By reversing the overall answer, we can say it is true if it is not false for any pair.
+  (not (true-for-any-pair? (lambda (a b) (not (pred a b))) sent)))
+
+'(tests for 19.8)
+(true-for-all-pairs-non-recursive? equal? '(a b c c d))
+(true-for-all-pairs-non-recursive? equal? '(a a a a a))
+(true-for-all-pairs-non-recursive? < '(20 16 5 8 6))
+(true-for-all-pairs-non-recursive? < '(3 7 19 22 43))
+
+#! 19.9
+(define (earliest-helper so-far rest sort-by)
+  (cond ((empty? rest) so-far)
+        ((sort-by so-far (first rest))
+         (earliest-helper so-far (bf rest) sort-by))
+        (else (earliest-helper (first rest) (bf rest) sort-by))))
+
+(define (earliest-word sent sort-by)
+  (earliest-helper (first sent) (bf sent) sort-by))
+
+(define (remove-once wd sent)
+  (cond ((empty? sent) '())
+	((equal? wd (first sent)) (bf sent))
+	(else (se (first sent) (remove-once wd (bf sent))))))
+
+(define (sort-mod sent sort-by)
+  (if (empty? sent)
+      '()
+      (se (earliest-word sent sort-by)
+          (sort-mod (remove-once (earliest-word sent sort-by) sent) sort-by))))
+
+(sort-mod '(the whole world loves it when you are in the news) before?)
+
+(sort-mod '(4 23 7 5 16 3) <)
+(sort-mod '(4 23 7 5 16 3) >)
+(sort-mod '(john paul george ringo) before?)
+
+#! 19.10
+(define (tree-map fn tree)
+  (make-node (fn (datum tree))
+             (map (lambda (child) (tree-map fn child))
+                    (children tree))))
+
+(define tree-a (make-node 2 (list (make-node 3 (list (make-node 5 '())))
+                                  (make-node 4 (list (make-node 6 '())
+                                                     (make-node 7 '()))))))
+
+(define tree-b (make-node 3 (list (make-node 4 '())
+                                  (make-node 7 '())
+                                  (make-node 2 (list (make-node 3 '())
+                                                     (make-node 8 '()))))))
+
+tree-a
+(tree-map (lambda (node-val) (* node-val 2)) tree-a)
+
+tree-b
+(tree-map (lambda (node-val) (+ node-val 5)) tree-b)
+
+#! 19.11
+(define (repeated-mod fn num-times)
+  ;; The recursive call will be a function of two args
+  ;; The result that we want is a function of a single arg.
+  ;; TODO: Write a good explanation for why this works
+  (if (= num-times 0)
+      (lambda (x) x)
+      (lambda (x)
+        ((repeated-mod fn (- num-times 1)) (fn x)))))
+
+(define (plus-one x)
+  (+ 1 x))
+
+((repeated plus-one 12) 0)
+((repeated-mod plus-one 12) 0)
+
+#! 19.12
+(define (tree-reduce fn tree)
+  (if (empty? (children tree))
+      (fn (datum tree))
+      (apply fn (cons (datum tree)
+                      (map (lambda (child) (tree-reduce fn child))
+                           (children tree))))))
+
+(trace tree-reduce)
+(tree-reduce + tree-a)
+(tree-reduce + tree-b)
+
+#! 19.13
+(define (deep-reduce fn structure)
+  (cond ((list? structure)
+         (apply fn (map (lambda (sublist) (deep-reduce fn sublist))
+                        structure)))
+        (else (fn structure))))
+
+(deep-reduce word '(r ((a (m b) (l)) (e (r)))))
+(deep-reduce + '(1 ((2 (3 4) (5)) (6 (7)))))
