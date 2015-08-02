@@ -93,4 +93,68 @@
                          "is not a valid input. Please choose a position 1-9."))
                (ask-user-v2 position letter)))))
 
-(play-ttt ttt ask-user-v2)
+;;(play-ttt ttt ask-user-v2)
+
+#! 20.7
+(define (ask-user-v3 position letter)
+  (print-position position)
+  (display letter)
+  (display "'s move: ")
+  (let ((input (read)))
+    (cond ((and (number? input) (>= input 1) (<= input 9))
+           (if (not (equal? (item input position) '_))
+               (begin (show (se input
+                            "is already occupied. Please choose a free position"))
+                       (ask-user-v3 position letter))
+               input))
+          (else (begin (show (se input
+                                 "is not a valid input. Please choose a position 1-9."))
+                       (ask-user-v3 position letter))))))
+
+;;(play-ttt ttt ask-user-v3)
+
+#! 20.8
+(define (play-ttt-v2 x-strat o-strat)
+  (play-ttt-helper-v2 x-strat o-strat '_________ 'x))
+
+(define (play-ttt-helper-v2 x-strat o-strat position whose-turn)
+  (cond ((already-won? position (opponent whose-turn))
+         (begin
+           (print-position position)
+           (list (opponent whose-turn) 'wins!)))
+        ((tie-game? position) '(tie game))
+        (else (let ((square (if (equal? whose-turn 'x)
+                                (x-strat position 'x)
+                                (o-strat position 'o))))
+                (play-ttt-helper-v2 x-strat
+                                 o-strat
+                                 (add-move square whose-turn position)
+                                 (opponent whose-turn))))))
+
+;;(play-ttt-v2 ttt ask-user-v3)
+
+#! 20.9
+(define (game)
+  (show "Choose x or o")
+  (let ((choice (read)))
+    (cond ((member? choice '(x o))
+           (if (equal? choice 'x)
+               (play-ttt-v2 ask-user-v3 ttt)
+               (play-ttt-v2 ttt ask-user-v3)))
+          (else (begin
+                  (show (se choice
+                            "is not x or o"))
+                  (game))))))
+
+;;(game)
+
+(define (games)
+  (begin
+    (game)
+    (show "Play again? (y/n)")
+    (let ((choice (read)))
+      (if (equal? choice 'y)
+          (game)
+          #f))))
+
+(games)
