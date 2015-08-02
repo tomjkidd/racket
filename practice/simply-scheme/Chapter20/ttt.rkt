@@ -1,6 +1,6 @@
 #lang racket
 (require (planet dyoo/simply-scheme:2))
-
+(require racket/trace)
 #| First version
 (define (ttt position me)
   (cond ((i-can-win?) (choose-winning-move))
@@ -220,3 +220,86 @@ _: the position is free
 (tie-game-v2? 'oxoxxoxox 'x)
 (tie-game-v2? 'oxoxxoxox 'o)
 (tie-game-v2? 'o_oxxoxox 'o)
+
+#! Chapter 20
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; Actual game
+;;;;;;;;;;;;;;;;;;;;;;
+
+(define (stupid-ttt position letter)
+  (location '_ position))
+
+(define (location letter word)
+  (if (equal? letter (first word))
+      1
+      (+ 1 (location letter (bf word)))))
+
+(define (play-ttt x-strat o-strat)
+  (play-ttt-helper x-strat o-strat '_________ 'x))
+
+(define (play-ttt-helper x-strat o-strat position whose-turn)
+  (cond ((already-won? position (opponent whose-turn))
+         (list (opponent whose-turn) 'wins!))
+        ((tie-game? position) '(tie game))
+        (else (let ((square (if (equal? whose-turn 'x)
+                                (x-strat position 'x)
+                                (o-strat position 'o))))
+                (play-ttt-helper x-strat
+                                 o-strat
+                                 (add-move square whose-turn position)
+                                 (opponent whose-turn))))))
+
+(define (add-move square letter position)
+  (if (= square 1)
+      (word letter (bf position))
+      (word (first position)
+            (add-move (- square 1) letter (bf position)))))
+
+(trace play-ttt-helper)
+(play-ttt ttt stupid-ttt)
+(play-ttt stupid-ttt ttt)
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; Board Display
+;;;;;;;;;;;;;;;;;;;;;;
+(define (print-position position)
+  (print-row (subword position 1 3))
+  (show "-+-+-")
+  (print-row (subword position 4 6))
+  (show "-+-+-")
+  (print-row (subword position 7 9))
+  (newline))
+
+(define (print-row row)
+  (maybe-display (first row))
+  (display "|")
+  (maybe-display (first (bf row)))
+  (display "|")
+  (maybe-display (last row))
+  (newline))
+
+(define (maybe-display letter)
+  (if (not (equal? letter '_))
+      (display letter)
+      (display " ")))
+
+(define (subword wd start end)
+  ((repeated bf (- start 1))
+   ((repeated bl (- (count wd) end))
+    wd)))
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; Accepting User input
+;;;;;;;;;;;;;;;;;;;;;;
+(define (ask-user position letter)
+  (print-position position)
+  (display letter)
+  (display "'s move: ")
+  (read))
+
+;;(define (print-position position)
+;;  (show position))
+
+(print-position '_x_oo__xx)
+(play-ttt ttt ask-user)

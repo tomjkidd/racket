@@ -80,3 +80,5 @@
 		(sergei rachmaninov) (modest musorgsky)))
 
 (name-table '((bill evans) (paul motian) (scott lefaro)))
+
+#! 20.6
