@@ -1,13 +1,7 @@
 #lang racket
 (require (planet dyoo/simply-scheme:2))
 (require racket/trace)
-#| First version
-(define (ttt position me)
-  (cond ((i-can-win?) (choose-winning-move))
-        ((opponent-can-win?) (block-opponent-win))
-        ((i-can-win-next-time?) (prepare-win))
-        (else (whatever))))
-
+#|
 Positions are indicated as follows:
 |1|2|3|
 |4|5|6|
@@ -21,6 +15,7 @@ o: o is in the position
 _: the position is free
 
 |#
+(provide (all-defined-out))
 
 (define (find-triples position)
   (every (lambda (comb) (substitute-triple comb position))
@@ -256,7 +251,7 @@ _: the position is free
       (word (first position)
             (add-move (- square 1) letter (bf position)))))
 
-(trace play-ttt-helper)
+;;(trace play-ttt-helper)
 (play-ttt ttt stupid-ttt)
 (play-ttt stupid-ttt ttt)
 
@@ -301,5 +296,5 @@ _: the position is free
 ;;(define (print-position position)
 ;;  (show position))
 
-(print-position '_x_oo__xx)
-(play-ttt ttt ask-user)
+;;(print-position '_x_oo__xx)
+;;(play-ttt ttt ask-user)

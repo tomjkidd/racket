@@ -82,3 +82,15 @@
 (name-table '((bill evans) (paul motian) (scott lefaro)))
 
 #! 20.6
+(define (ask-user-v2 position letter)
+  (print-position position)
+  (display letter)
+  (display "'s move: ")
+  (let ((input (read)))
+    (if (and (number? input) (>= input 1) (<= input 9))
+        input
+        (begin (show (se input
+                         "is not a valid input. Please choose a position 1-9."))
+               (ask-user-v2 position letter)))))
+
+(play-ttt ttt ask-user-v2)
