@@ -23,10 +23,10 @@ _: the position is free
 |#
 
 (define (find-triples position)
-  (every (lambda (comb) (substitue-triple comb position))
+  (every (lambda (comb) (substitute-triple comb position))
          '(123 456 789 147 258 369 159 357)))
 
-(define (substitue-triple combination position)
+(define (substitute-triple combination position)
   (accumulate word
               (every (lambda (square)
                        (substitute-letter square position))
@@ -37,9 +37,9 @@ _: the position is free
       square
       (item square position)))
 
-(substitue-triple 456 '_xo_x_o__)
-(substitue-triple 147 '_xo_x_o__)
-(substitue-triple 357 '_xo_x_o__)
+(substitute-triple 456 '_xo_x_o__)
+(substitute-triple 147 '_xo_x_o__)
+(substitute-triple 357 '_xo_x_o__)
 
 (find-triples '_xo_x_o__)
 (find-triples 'x_____oxo)
@@ -165,3 +165,30 @@ _: the position is free
 (first-choice "1xo4x6o8914oxx8o691x9oxo" '(5 1 3 7 9 2 4 6 8))
 (best-free-square (find-triples '_________))
 (best-free-square (find-triples '____x____))
+
+#! 10.1
+(define (any? lst pred)
+  (cond ((null? lst) #f)
+        ((pred (first lst)) (first lst))
+        (else (any? (bf lst) pred))))
+
+(any? '(1 2 3) (lambda (x) (equal? x 2)))
+
+(define (true-for-all? sent pred)
+  (cond ((empty? sent) #f)
+        ((empty? (bf sent)) (pred (first sent)))
+        (else (and (pred (first sent))
+                   (true-for-all? (bf sent) pred)))))
+;;(trace true-for-all?)
+(true-for-all? 'xxx (lambda (x) (equal? x 'x)))
+
+(define (already-won? position letter)
+  (let ((triples (find-triples position)))
+    (if (any? triples
+              (lambda (triple)
+                (true-for-all? triple (lambda (ltr) (equal? ltr letter)))))
+        #t
+        #f)))
+
+(already-won? 'xxx______ 'o)
+(already-won? 'xxx______ 'o)
