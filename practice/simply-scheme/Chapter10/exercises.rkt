@@ -190,5 +190,68 @@ _: the position is free
         #t
         #f)))
 
+(already-won? 'xxx______ 'x)
 (already-won? 'xxx______ 'o)
-(already-won? 'xxx______ 'o)
+
+(ttt 'xxxo_o___ 'o)
+
+#! 10.2
+;;(ttt 'oxoxxoxox 'o) ;; Invalid argument to FIRST: (), tie game
+(define tie-triples (find-triples 'oxoxxoxox))
+(i-can-win? tie-triples 'o)
+(opponent-can-win? tie-triples 'o)
+(i-can-fork? tie-triples 'o)
+(i-can-advance? tie-triples 'o)
+;;(best-free-square tie-triples) <- This is what fails.
+
+;; TODO: May want to work in some smarts to check for a win
+(define (tie-game? position)
+  (true-for-all? position (lambda (x) (member? x '(x o)))))
+
+(tie-game? 'oxoxxoxox)
+
+#! 10.3
+(define (tie-game-v2? position letter)
+  (let ((triples (find-triples position)))
+    (cond ((i-can-win? triples letter) #f)
+          (else (tie-game? position)))))
+
+(tie-game-v2? 'oxoxxoxox 'x)
+(tie-game-v2? 'oxoxxoxox 'o)
+(tie-game-v2? 'o_oxxoxox 'o)
+
+#! 10.4
+#! What if you could win a game by having three squares forming an L shape in a corner?
+#|
+|1|2|3|
+|4|5|6|
+|7|8|9|
+So, this means that triples to check would include...
+rows: '(123 456 789)
+columns: '(147 258 369)
+diag: '(159 357)
+corner-Ls: '(124 236 478 689)
+When the corner-Ls are added, what changes in the logic?
+|#
+
+#! What if diagonals didn't win?
+#|
+So, this means that triples to check would include...
+rows: '(123 456 789)
+columns: '(147 258 369)
+When the diagonals are removed, I am pretty sure no changes are needed.
+|#
+
+#! What if you could win by having four squares in a corner?
+#|
+So, this means that triples to check would include...
+rows: '(123 456 789)
+columns: '(147 258 369)
+diag: '(159 357)
+all-corners: '(1379)
+
+This introduces a quadruple, when we only have triples.
+What would need to change to support quadruple?
+|#
+
+#! 10.5 implement chess, haha. Don't think I'll be doing this.
