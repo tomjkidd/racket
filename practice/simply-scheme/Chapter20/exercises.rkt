@@ -139,8 +139,8 @@
   (let ((choice (read)))
     (cond ((member? choice '(x o))
            (if (equal? choice 'x)
-               (play-ttt-v2 ask-user-v3 ttt)
-               (play-ttt-v2 ttt ask-user-v3)))
+               (show (play-ttt-v2 ask-user-v3 ttt))
+               (show (play-ttt-v2 ttt ask-user-v3))))
           (else (begin
                   (show (se choice
                             "is not x or o"))
@@ -154,7 +154,7 @@
     (show "Play again? (y/n)")
     (let ((choice (read)))
       (if (equal? choice 'y)
-          (game)
+          (games)
           #f))))
 
 (games)
