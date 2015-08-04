@@ -409,4 +409,30 @@ just the #t value.
 	  (else (show "You typed more than one argument!  Try again.")
 		(get-arg)))))
 
+#! 21.6
+#|
+What happens if a function is requested that isn't in the a-list?
+get-fn will call valid-fn-name? before it evaluates arg-count. If #f is returned,
+the entry doesn't exist in the list, and arg-count will not be evaluated.
+|#
+
+#! 21.7
+#|
+The word? function knows how to handle input that is not a word.
+(lambda (x) #t) means that we allow any input through to word because it's domain
+is not limited.
+|#
+
+#! 21.8
+#|
+(functions) returns (functions-loop), which ultimately returns "Thanks for using FUNCTIONS!"
+when the user types exit as a function name.
+|#
+
+#! 21.9
+#|
+Based on 21.8, the only reduction that occurs is that the user has an opportunity to
+type exit as a function name after evaluating any other function.
+|#
+
 ;;(functions-21.5)
