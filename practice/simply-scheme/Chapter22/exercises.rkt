@@ -59,7 +59,7 @@
   (let ((stuff (read-string port)))
     (if (eof-object? stuff)
         'done
-        (begin (show-line stuff)
+        (begin (show stuff)
                (print-file-helper port)))))
 
 (print-file "songs")
@@ -150,3 +150,35 @@
 
 (file-map (lambda (sent) (justify sent 50)) "r5rs" "r5rs-just")
 (print-file "r5rs-just")
+
+(define (filemerge file1 file2 outfile)
+  (let ((p1 (open-input-file file1))
+        (p2 (open-input-file file2))
+        (outp (open-output-file outfile)))
+    (filemerge-helper p1 p2 outp (read-string p1) (read-string p2))
+    (close-output-port outp)
+    (close-input-port p1)
+    (close-input-port p2)
+    'done))
+
+(define (filemerge-helper p1 p2 outp line1 line2)
+  (cond ((eof-object? line1) (merge-copy line2 p2 outp))
+        ((eof-object? line2) (merge-copy line1 p1 outp))
+        ((before? line1 line2)
+         (show line1 outp)
+         (filemerge-helper p1 p2 outp (read-string p1) line2))
+        (else (show line2 outp)
+              (filemerge-helper p1 p2 outp line1 (read-string p2)))))
+
+(define (merge-copy line inp outp)
+  (if (eof-object? line)
+      #f
+      (begin (show line outp)
+             (merge-copy (read-string inp) inp outp))))
+
+(delete-if-exists "filemerge-combo")
+(filemerge "filemerge1" "filemerge2" "filemerge-combo")
+
+(print-file "filemerge-combo")
+         
+
