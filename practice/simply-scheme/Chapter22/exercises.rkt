@@ -181,4 +181,39 @@
 
 (print-file "filemerge-combo")
          
+#! 22.1
+(define (concatenate input-file-list output-file)
+  (let ((outp (open-output-file output-file)))
+    (concatenate-helper input-file-list outp)
+    (close-output-port outp)))
 
+(define (concatenate-helper input-file-list outp)
+  (cond ((empty? input-file-list) 'done)
+        (else (let ((inp (open-input-file (car input-file-list))))
+                (begin
+                  (file-map-helper (lambda (x) x) inp outp)
+                  (close-input-port inp)
+                  (concatenate-helper (cdr input-file-list) outp))))))
+
+(delete-if-exists "concat-comb")
+(concatenate (list "concat1" "concat2") "concat-comb")
+(print-file "concat-comb")
+
+#! 22.2
+(define (file-map-no-output-port fn inname)
+  (let ((inp (open-input-file inname)))
+    (let ((result (file-map-helper-no-output-port fn inp)))
+      (close-input-port inp)
+      result)))
+
+(define (file-map-helper-no-output-port fn inp)
+  (let ((line (read-line inp)))
+    (if (eof-object? line)
+        '()
+        (cons (fn line)
+              (file-map-helper-no-output-port fn inp)))))
+
+(define (file-count-lines name)
+  (accumulate + (file-map-no-output-port (lambda (line) 1) name)))
+
+(file-count-lines "countlinestest")
