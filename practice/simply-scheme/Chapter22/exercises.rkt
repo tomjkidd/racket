@@ -200,20 +200,39 @@
 (print-file "concat-comb")
 
 #! 22.2
-(define (file-map-no-output-port fn inname)
+(define (file-map-no-output-port fn inname read-fn)
   (let ((inp (open-input-file inname)))
-    (let ((result (file-map-helper-no-output-port fn inp)))
+    (let ((result (file-map-helper-no-output-port fn inp read-fn)))
       (close-input-port inp)
       result)))
 
-(define (file-map-helper-no-output-port fn inp)
-  (let ((line (read-line inp)))
+(define (file-map-helper-no-output-port fn inp read-fn)
+  (let ((line (read-fn inp)))
     (if (eof-object? line)
         '()
         (cons (fn line)
-              (file-map-helper-no-output-port fn inp)))))
+              (file-map-helper-no-output-port fn inp read-fn)))))
 
 (define (file-count-lines name)
-  (accumulate + (file-map-no-output-port (lambda (line) 1) name)))
+  (accumulate + (file-map-no-output-port (lambda (line) 1) name read-line)))
 
 (file-count-lines "countlinestest")
+
+#! 22.3
+(define (file-count-words name)
+  (accumulate + (file-map-no-output-port words-in-line name read-line)))
+
+(define (words-in-line line)
+  (count line))
+
+(trace words-in-line)
+(file-count-words "countwordstest")
+
+#! 22.4
+(define (file-count-characters name)
+  (accumulate + (file-map-no-output-port chars-in-line name read-string)))
+
+(define (chars-in-line line)
+  (count line)) ;; NOTE: This works because read-string is used as the read function!
+
+(file-count-characters "countcharstest")
