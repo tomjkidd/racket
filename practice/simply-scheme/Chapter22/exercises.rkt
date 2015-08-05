@@ -236,3 +236,28 @@
   (count line)) ;; NOTE: This works because read-string is used as the read function!
 
 (file-count-characters "countcharstest")
+
+#! 22.5
+(define (remove-immediate-dup-lines in-file-name out-file-name)
+  (remove-dup-open-close-helper (lambda (line) line) in-file-name out-file-name ""))
+      
+(define (remove-dup-open-close-helper fn inname outname prev-line)
+  (let ((inport (open-input-file inname))
+        (outport (open-output-file outname)))
+    (file-map-helper-rempove-dup fn prev-line inport outport)
+    (close-input-port inport)
+    (close-output-port outport)
+    'done))
+
+(define (file-map-helper-rempove-dup fn prev-line inport outport)
+  (let ((line (read-line inport)))
+    (if (eof-object? line)
+        'done
+        (begin (if (equal? line prev-line)
+                   #f
+                   (show-line (fn line) outport))
+               (file-map-helper-rempove-dup fn line inport outport)))))
+
+(delete-if-exists "dupline-result")
+(remove-immediate-dup-lines "dupline" "dupline-result")
+(print-file "dupline-result")
