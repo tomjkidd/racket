@@ -290,10 +290,15 @@
 (string-contains? "This is a test of the lookup function" "the")
 
 (define (lookup filename wd)
-  (filter (lambda (line) line)
-          (file-map-no-output-port (lambda (line) (if (string-contains? line wd)
-                                                      line
-                                                      #f))
-                                   filename
-                                   read-string)))
+  (let ((results 
+         (filter (lambda (line) line)
+                 (file-map-no-output-port (lambda (line) (if (string-contains? line wd)
+                                                             line
+                                                             #f))
+                                          filename
+                                          read-string))))
+    (for-each (lambda (line) (show line)) results)))
+
 (lookup "lookuptest" "the")
+(lookup "lookuptest" "contain")
+;; TODO: This can be better if you can specify whether or not to pay attention to case.
