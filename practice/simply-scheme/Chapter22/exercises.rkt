@@ -268,21 +268,32 @@
 
 (define (string-contains? str wd)
   (cond ((or (empty? str) (empty? wd)) #f)
-        ((equal? (first str) (first wd)) (string-contains-helper (bf str) (bf wd)))
+        ((equal? (first str) (first wd)) (if (string-contains-helper (bf str) (bf wd))
+                                             #t
+                                             (string-contains? (bf str) wd)))
         (else (string-contains? (bf str) wd))))
 
 (define (string-contains-helper str wd)
   (cond ((empty? wd) #t)
+        ((empty? str) #f)
         ((equal? (first str) (first wd)) (string-contains-helper (bf str) (bf wd)))
         (else #f)))
 
-(trace string-contains?)
-(trace string-contains-helper)
+;;(trace string-contains?)
+;;(trace string-contains-helper)
 
 (string-contains? "abcde" "e")
 (string-contains? "abcde" "f")
 (string-contains? "the fog is heavy" "fog")
 (string-contains? "barfy" "")
+(string-contains? "te" "tea")
+(string-contains? "This is a test of the lookup function" "the")
 
 (define (lookup filename wd)
-  wd)
+  (filter (lambda (line) line)
+          (file-map-no-output-port (lambda (line) (if (string-contains? line wd)
+                                                      line
+                                                      #f))
+                                   filename
+                                   read-string)))
+(lookup "lookuptest" "the")
