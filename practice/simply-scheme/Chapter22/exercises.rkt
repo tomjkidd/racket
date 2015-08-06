@@ -261,3 +261,28 @@
 (delete-if-exists "dupline-result")
 (remove-immediate-dup-lines "dupline" "dupline-result")
 (print-file "dupline-result")
+
+#! 22.6
+"foghorn"
+"horn"
+
+(define (string-contains? str wd)
+  (cond ((or (empty? str) (empty? wd)) #f)
+        ((equal? (first str) (first wd)) (string-contains-helper (bf str) (bf wd)))
+        (else (string-contains? (bf str) wd))))
+
+(define (string-contains-helper str wd)
+  (cond ((empty? wd) #t)
+        ((equal? (first str) (first wd)) (string-contains-helper (bf str) (bf wd)))
+        (else #f)))
+
+(trace string-contains?)
+(trace string-contains-helper)
+
+(string-contains? "abcde" "e")
+(string-contains? "abcde" "f")
+(string-contains? "the fog is heavy" "fog")
+(string-contains? "barfy" "")
+
+(define (lookup filename wd)
+  wd)
