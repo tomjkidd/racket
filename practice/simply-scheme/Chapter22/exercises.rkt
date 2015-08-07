@@ -302,3 +302,47 @@
 (lookup "lookuptest" "the")
 (lookup "lookuptest" "contain")
 ;; TODO: This can be better if you can specify whether or not to pay attention to case.
+
+#! 22.7
+(define (page filename)
+  (let ((results (file-map-no-output-port (lambda (line) line) filename read-string)))
+    (for-each (lambda (line) (show line)) results)))
+
+(page "pagetest")
+
+(define (page-stream filename)
+  (file-map-no-output-port-2 page-helper filename read-string))
+
+(define (file-map-no-output-port-2 helper-fn inname read-fn)
+  (let ((inp (open-input-file inname)))
+    (helper-fn inp read-fn)
+    (close-input-port inp)))
+
+(define page-size 5)
+
+(define (page-helper inp read-fn)
+  (show-pages inp read-fn))
+
+(define (show-pages inp read-fn)
+  (let ((page (consume-page inp read-fn '() page-size)))
+    (if page
+        (begin
+          (show-page page)
+          (show "end of page")
+          ;;(read-line)
+          (show-pages inp read-fn))
+        (show "end of file"))))
+
+(define (show-page page)
+  (for-each (lambda (line) (show line)) page))
+
+(define (consume-page inp read-fn accum remaining)
+  ;; TODO: Find a way to do this without reverse.
+  (let ((line (read-fn inp)))
+    (cond ((and (eof-object? line) (null? accum)) #f)
+          ((eof-object? line) (reverse accum))
+          ((= remaining 1) (reverse (cons line accum)))
+          (else (consume-page inp read-fn (cons line accum) (- remaining 1))))))
+
+;;(trace consume-page)
+(page-stream "pagetest")
