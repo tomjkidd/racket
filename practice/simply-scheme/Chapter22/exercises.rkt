@@ -304,12 +304,6 @@
 ;; TODO: This can be better if you can specify whether or not to pay attention to case.
 
 #! 22.7
-(define (page filename)
-  (let ((results (file-map-no-output-port (lambda (line) line) filename read-string)))
-    (for-each (lambda (line) (show line)) results)))
-
-(page "pagetest")
-
 (define (page-stream filename)
   (file-map-no-output-port-2 page-helper filename read-string))
 
@@ -321,28 +315,33 @@
 (define page-size 5)
 
 (define (page-helper inp read-fn)
-  (show-pages inp read-fn))
+  (show-pages inp read-fn '() page-size))
 
-(define (show-pages inp read-fn)
-  (let ((page (consume-page inp read-fn '() page-size)))
-    (if page
-        (begin
-          (show-page page)
-          (show "end of page")
-          ;;(read-line)
-          (show-pages inp read-fn))
-        (show "end of file"))))
+(define (show-pages inp read-fn accum pg-size)
+  (let ((result (consume-page inp read-fn accum pg-size #f)))
+    (let ((page (car result))
+          (eof-reached? (cadr result)))
+      (show-page page)
+      (show "end of page")
+      (if eof-reached?
+          (show "end of file")
+          (begin
+            ;;(read-line)
+            (show-pages inp read-fn (list (last page)) pg-size))))))
 
 (define (show-page page)
   (for-each (lambda (line) (show line)) page))
 
-(define (consume-page inp read-fn accum remaining)
+(define (consume-page inp read-fn accum pg-size eof-reached?)
   ;; TODO: Find a way to do this without reverse.
   (let ((line (read-fn inp)))
-    (cond ((and (eof-object? line) (null? accum)) #f)
-          ((eof-object? line) (reverse accum))
-          ((= remaining 1) (reverse (cons line accum)))
-          (else (consume-page inp read-fn (cons line accum) (- remaining 1))))))
+    (cond ((eof-object? line)
+           (list (reverse accum) (eof-object? line)))
+          ((= (length accum) (- pg-size 1))
+           (list (reverse (cons line accum)) (eof-object? line)))
+          (else
+           (consume-page inp read-fn (cons line accum) pg-size (eof-object? line))))))
 
 ;;(trace consume-page)
+;; TODO: Create a way to set the number of history lines to display
 (page-stream "pagetest")
