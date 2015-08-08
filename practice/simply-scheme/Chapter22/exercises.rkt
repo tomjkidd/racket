@@ -312,12 +312,13 @@
     (helper-fn inp read-fn)
     (close-input-port inp)))
 
-(define page-size 5)
+(define page-size 24)
+(define history-size 1)
 
 (define (page-helper inp read-fn)
-  (show-pages inp read-fn '() page-size))
+  (show-pages inp read-fn '() page-size history-size))
 
-(define (show-pages inp read-fn accum pg-size)
+(define (show-pages inp read-fn accum pg-size hist-size)
   (let ((result (consume-page inp read-fn accum pg-size #f)))
     (let ((page (car result))
           (eof-reached? (cadr result)))
@@ -326,8 +327,9 @@
       (if eof-reached?
           (show "end of file")
           (begin
+            ;; NOTE: Uncomment for user input to page
             ;;(read-line)
-            (show-pages inp read-fn (list (last page)) pg-size))))))
+            (show-pages inp read-fn (reverse (take-last hist-size page)) pg-size hist-size))))))
 
 (define (show-page page)
   (for-each (lambda (line) (show line)) page))
@@ -342,6 +344,18 @@
           (else
            (consume-page inp read-fn (cons line accum) pg-size (eof-object? line))))))
 
+(define (take num lst)
+  (if (= num 0)
+      '()
+      (cons (car lst) (take (- num 1) (cdr lst)))))
+
+(define (drop num lst)
+  (if (= num 0)
+      lst
+      (drop (- num 1) (cdr lst))))
+
+(define (take-last num lst)
+  (drop (- (length lst) num) lst))
+
 ;;(trace consume-page)
-;; TODO: Create a way to set the number of history lines to display
 (page-stream "pagetest")
