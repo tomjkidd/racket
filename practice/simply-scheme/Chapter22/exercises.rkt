@@ -359,3 +359,39 @@
 
 ;;(trace consume-page)
 (page-stream "pagetest")
+
+#! 22.8
+(define (join file1-name file2-name file1-join-index file2-join-index out-filename)
+  (let ((file1p (open-input-file file1-name))
+        (file2p (open-input-file file2-name))
+        (outp (open-output-file out-filename)))
+    (join-helper file1p file2p outp file1-join-index file2-join-index)
+    (close-input-port file1p)
+    (close-input-port file2p)
+    (close-output-port outp)))
+
+(define (join-helper file1p file2p outp file1-join-index file2-join-index)
+  (let ((line1 (read file1p))
+        (line2 (read file2p)))
+    (if (or (eof-object? line1) (eof-object? line2))
+        (show 'done)
+        (let ((join-key-1 (list-ref line1 (- file1-join-index 1)))
+              (join-key-2 (list-ref line2 (- file2-join-index 1))))
+          (begin
+            ;; TODO: Add proper handling for absense of join-key match
+            (cond ((equal? join-key-1 join-key-2) (join-lines line1 line2 outp))
+                  (else (begin
+                          (show join-key-1)
+                          (show join-key-2))))
+            (join-helper file1p file2p outp file1-join-index file2-join-index))))))
+
+(define (join-lines line1 line2 outp)
+  (write (append (list (car line1)
+                      (cadr line1)
+                      (caddr line1))
+                (cdr line2))
+         outp)
+  (newline outp))
+
+(delete-if-exists "combined-file")
+(join "class-roster" "class-grades" 3 1 "combined-file")
