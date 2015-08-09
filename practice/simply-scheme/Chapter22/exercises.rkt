@@ -371,12 +371,8 @@
     (close-output-port outp)))
 
 (define (join-helper file1p file2p outp file1-join-index file2-join-index ln1 ln2)
-  (let ((line1 (if (equal? ln1 #f)
-                   (read file1p)
-                   ln1))
-        (line2 (if (equal? ln2 #f)
-                   (read file2p)
-                   ln2)))
+  (let ((line1 (ensure-line file1p ln1))
+        (line2 (ensure-line file2p ln2)))
     (if (or (eof-object? line1) (eof-object? line2))
         (show 'done)
         (let ((join-key-1 (list-ref line1 (- file1-join-index 1)))
@@ -389,6 +385,11 @@
                    (join-helper file1p file2p outp file1-join-index file2-join-index #f line2))
                   ((before? join-key-2 join-key-1)
                    (join-helper file1p file2p outp file1-join-index file2-join-index line1 #f))))))))
+
+(define (ensure-line file-port false-or-line)
+  (if (equal? false-or-line #f)
+      (read file-port)
+      false-or-line))
 
 (define (join-lines line1 line2 outp)
   (write (append (list (car line1)
