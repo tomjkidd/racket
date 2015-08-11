@@ -59,6 +59,8 @@ v
 (make-deck)
 (make-deck)
 
+(define (square x) (* x x))
+
 (define (list-square numbers)
   (if (null? numbers)
       '()
@@ -75,3 +77,38 @@ v
       new
       (begin (vector-set! new index (square (vector-ref old index)))
              (vec-sq-helper new old (- index 1)))))
+
+(list-square '(1 2 3 4 5))
+(vector-square #(1 2 3 4 5))
+
+(define dessert (vector 'chocolate 'sundae))
+(define two-desserts (list dessert dessert))
+(vector-set! (car two-desserts) 1 'shake)
+two-desserts
+
+(define two-desserts2 (list (vector 'chocolate 'sundae)
+                            (vector 'chocolate 'sundae)))
+(vector-set! (car two-desserts2) 1 'shake)
+two-desserts2
+
+#! 23.1
+(define (sum-vector vec)
+  (sum-vector-helper vec 0 0))
+
+(define (sum-vector-helper vec index sum)
+  (if (>= index (vector-length vec))
+      sum
+      (sum-vector-helper vec
+                         (+ index 1)
+                         (+ (vector-ref vec index) sum))))
+
+(sum-vector #(6 7 8))
+
+#! 23.2
+(define (vector-fill-mod! vec value)
+  value)
+
+(define vec (vector 'one 'two 'three 'four))
+vec
+(vector-fill-mod! vec 'yeah)
+vec
