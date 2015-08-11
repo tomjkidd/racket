@@ -106,9 +106,35 @@ two-desserts2
 
 #! 23.2
 (define (vector-fill-mod! vec value)
-  value)
+  (vector-fill-helper vec value 0))
+
+(define (vector-fill-helper vec value index)
+  (if (>= index (vector-length vec))
+      vec
+      (begin (vector-set! vec index value)
+             (vector-fill-helper vec value (+ index 1)))))
+          
 
 (define vec (vector 'one 'two 'three 'four))
 vec
 (vector-fill-mod! vec 'yeah)
 vec
+
+#! 23.3
+(define (vector-append vec1 vec2)
+  (let ((new (make-vector (+ (vector-length vec1) (vector-length vec2)))))
+    (vector-append-helper vec1 vec2 new 0)))
+
+(define (vector-append-helper vec1 vec2 comb index)
+  (cond ((>= index (vector-length comb)) comb)
+        ((>= index (vector-length vec1)) (let ((index-in-2 (- index (vector-length vec1))))
+                                           (begin (vector-set! comb
+                                                               index
+                                                               (vector-ref vec2 index-in-2))
+                                                  (vector-append-helper vec1 vec2 comb (+ index 1)))))
+        (else (begin (vector-set! comb
+                                  index
+                                  (vector-ref vec1 index))
+                     (vector-append-helper vec1 vec2 comb (+ index 1))))))
+
+(vector-append '#(not a) '#(second time))
