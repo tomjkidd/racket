@@ -162,3 +162,61 @@ vec
              (vector-map-helper fn vec new (+ index 1)))))
 
 (vector-map (lambda (x) (* x x)) #(1 2 3 4 5))
+
+#! 23.6
+(define (vector-map! fn vec)
+  (vector-map!-helper fn vec 0))
+
+(define (vector-map!-helper fn vec index)
+  (if (>= index (vector-length vec))
+      vec
+      (begin (vector-set! vec index (fn (vector-ref vec index)))
+             (vector-map!-helper fn vec (+ index 1)))))
+
+(define vector-1 (make-vector 3))
+(vector-set! vector-1 0 1)
+(vector-set! vector-1 1 2)
+(vector-set! vector-1 2 3)
+vector-1
+(vector-map! (lambda (x) (* x x)) vector-1)
+
+#! 23.7
+#|
+vector-filter can be written because the lack of an "!" implies just creating a new
+vector of only the elements that pass.
+It might be easier to use a list as an intermediate data structure, because you don't
+know initially how many elements will pass the predicate function and make-vector requires
+that you know this. It would be inefficient to use make-vector in each helper call
+to construct the new vector.
+TODO: is there a way to make it more efficient than just create list then dump list to
+a vector?
+
+vector-filter! can't be written because the vector's size would not be able to change.
+The creates a problem in taking out elements where the predicate fails. You could do
+something like null or zero the elements out, but that doesn't help if you want to
+compose just the passing results in a calculation.
+|#
+
+(define (vector-filter pred vec)
+  (vector-filter-helper pred vec (- (vector-length vec) 1) '()))
+
+(define (vector-filter-helper pred vec index lst)
+  (if (< index 0)
+      (list->vector-mod lst)
+      (if (pred (vector-ref vec index))
+          (vector-filter-helper pred vec (- index 1) (cons (vector-ref vec index) lst))
+          (vector-filter-helper pred vec (- index 1) lst))))
+
+(define (list->vector-mod lst)
+  (let ((vec (make-vector (length lst))))
+    (list->vector-helper vec 0 lst)))
+
+(define (list->vector-helper vec index lst)
+  (if (null? lst)
+      vec
+      (begin (vector-set! vec index (car lst))
+             (list->vector-helper vec (+ index 1) (cdr lst)))))
+
+(trace list->vector-helper)
+(vector-filter (lambda (x) (odd? x)) vector-1)
+      
