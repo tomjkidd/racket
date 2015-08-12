@@ -138,3 +138,27 @@ vec
                      (vector-append-helper vec1 vec2 comb (+ index 1))))))
 
 (vector-append '#(not a) '#(second time))
+
+#! 23.4
+(define (vector->list-mod vec)
+  (vector->list-helper vec 0))
+
+(define (vector->list-helper vec index)
+  (if (>= index (vector-length vec))
+      '()
+      (cons (vector-ref vec index) (vector->list-helper vec (+ index 1)))))
+
+(vector->list-mod #(1 2 3))
+
+#! 23.5
+(define (vector-map fn vec)
+  (let ((new (make-vector (vector-length vec))))
+    (vector-map-helper fn vec new 0)))
+
+(define (vector-map-helper fn vec new index)
+  (if (>= index (vector-length vec))
+      new
+      (begin (vector-set! new index (fn (vector-ref vec index)))
+             (vector-map-helper fn vec new (+ index 1)))))
+
+(vector-map (lambda (x) (* x x)) #(1 2 3 4 5))
