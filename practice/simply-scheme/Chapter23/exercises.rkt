@@ -219,4 +219,26 @@ compose just the passing results in a calculation.
 
 (trace list->vector-helper)
 (vector-filter (lambda (x) (odd? x)) vector-1)
-      
+
+#! 23.8
+(define lap-count-to-win 200)
+
+(define (lap-mod car-number)
+  (begin
+    (vector-set! *lap-vector*
+                 car-number
+                 (+ (vector-ref *lap-vector* car-number) 1))
+    (if (>= (vector-ref *lap-vector* car-number) lap-count-to-win)
+        (show (se "Car" car-number "wins!"))
+        void))
+  (vector-ref *lap-vector* car-number))
+
+(define (range start stop)
+  (range-helper start stop '()))
+
+(define (range-helper index stop lst)
+  (if (> index stop)
+      lst
+      (cons index (range-helper (+ index 1) stop lst))))
+
+(for-each (lambda (x) (lap-mod 34)) (range 1 200))
