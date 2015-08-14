@@ -242,3 +242,36 @@ compose just the passing results in a calculation.
       (cons index (range-helper (+ index 1) stop lst))))
 
 (for-each (lambda (x) (lap-mod 34)) (range 1 200))
+
+#! 23.9
+(define (leader)
+  (leader-helper 0 0))
+
+(define (leader-helper leader index)
+  (if (>= index (vector-length *lap-vector*))
+      leader
+      (let ((leader-laps (vector-ref *lap-vector* leader))
+            (current-laps (vector-ref *lap-vector* index)))
+        (if (> current-laps leader-laps)
+            (leader-helper index (+ index 1))
+            (leader-helper leader (+ index 1))))))
+
+(leader)
+
+#! 23.10
+(define (leader-23.10)
+  (leader-helper-23.10 0 1))
+
+(define (leader-helper-23.10 leader index)
+  (cond ((= index 100) leader)
+        ((> (lap index) (lap leader))
+         (leader-helper index (+ index 1)))
+        (else (leader-helper leader (+ index 1)))))
+#|
+In the second condition, the lap function is being called,
+which is incrementing both the leader and the current index,
+not just comparing the values that are in *lap-vector*. This
+changing state means that leader is not functional, it does not
+do the job we want, which is to just report on which index has
+the most laps completed.
+|#
