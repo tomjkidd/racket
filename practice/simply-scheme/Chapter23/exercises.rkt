@@ -305,3 +305,34 @@ the most laps completed.
 
 (bill 3)
 (bill 5)
+
+#! 23.12
+(define sort-vector (make-vector 6))
+(vector-set! sort-vector 0 23)
+(vector-set! sort-vector 1 4)
+(vector-set! sort-vector 2 18)
+(vector-set! sort-vector 3 7)
+(vector-set! sort-vector 4 95)
+(vector-set! sort-vector 5 60)
+
+(define (selection-sort! vec)
+  (selection-sort-helper vec 0))
+
+(define (selection-sort-helper vec index)
+  (let ((swap-index (get-swap-index vec index index)))
+    (vector-swap! vec index swap-index)
+    (if (>= (+ index 1) (vector-length vec))
+        vec
+        (selection-sort-helper vec (+ index 1)))))
+
+(define (get-swap-index vec current-index swap-index)
+  (if (>= current-index (vector-length vec))
+      swap-index
+      (let ((current-value (vector-ref vec current-index))
+            (to-swap-value (vector-ref vec swap-index)))
+        (if (< to-swap-value current-value)
+            (get-swap-index vec (+ current-index 1) swap-index)
+            (get-swap-index vec (+ current-index 1) current-index)))))
+
+(trace selection-sort-helper)
+(selection-sort! sort-vector)
