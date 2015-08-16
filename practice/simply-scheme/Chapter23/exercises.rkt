@@ -336,3 +336,39 @@ the most laps completed.
 
 (trace selection-sort-helper)
 (selection-sort! sort-vector)
+
+#! 23.13
+(define (vector-swap2! vector index1 index2)
+  (vector-set! vector index1 (vector-ref vector index2))
+  (vector-set! vector index2 (vector-ref vector index1)))
+
+#|
+The first vector-set! will change index1's value, without saving a reference
+to what it was. This means that the value of index2 will end up in both places,
+which is not the intent of vector-swap.
+|#
+
+#! 23.14
+#|
+(matrix: two-dimensional version of a vector.)
+|#
+(define (make-matrix x-dim y-dim)
+  (let ((base-vector (make-vector x-dim)))
+    (for-each (lambda (index)
+                (vector-set! base-vector index (make-vector y-dim)))
+              (range 0 (- x-dim 1)))
+    base-vector))
+
+(define (matrix-set! matrix x-index y-index value)
+  (let ((x-vector (vector-ref matrix x-index)))
+    (vector-set! x-vector y-index value)))
+
+(define (matrix-ref matrix x-index y-index)
+  (let ((x-vector (vector-ref matrix x-index)))
+    (vector-ref x-vector y-index)))
+
+(define m (make-matrix 3 5))
+
+(matrix-set! m 2 1 '(her majesty))
+
+(matrix-ref m 2 1)
