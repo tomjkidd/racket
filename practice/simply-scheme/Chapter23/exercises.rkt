@@ -275,3 +275,33 @@ changing state means that leader is not functional, it does not
 do the job we want, which is to just report on which index has
 the most laps completed.
 |#
+
+#! 23.11
+(define *menu* '((potstickers 6.00)
+                 (wor-won-ton 2.00)
+                 (egg-rolls 2.75)
+                 (shin-shin-special-prawns 5.85)))
+
+(define *tables* (make-vector 5 0))
+
+(define (order table-num menu-item)
+  (let ((menu-item (assoc menu-item *menu*)))
+    (if menu-item
+        (let ((menu-item-price (cadr menu-item)))
+          (vector-set! *tables* (- table-num 1) (+ menu-item-price
+                                                   (vector-ref *tables* (- table-num 1)))))
+        void)))
+
+(define (bill table-num)
+  (let ((the-bill (vector-ref *tables* (- table-num 1)))) ;; Maintain a ref to the bill
+    (vector-set! *tables* (- table-num 1) 0) ;; Clear the bill
+    the-bill))
+
+(order 3 'potstickers)
+(order 3 'not-real);; this should not cause the bill to change...
+(order 3 'wor-won-ton)
+(order 5 'egg-rolls)
+(order 3 'shin-shin-special-prawns)
+
+(bill 3)
+(bill 5)
