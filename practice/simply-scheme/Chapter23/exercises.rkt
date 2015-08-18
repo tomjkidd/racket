@@ -372,3 +372,41 @@ which is not the intent of vector-swap.
 (matrix-set! m 2 1 '(her majesty))
 
 (matrix-ref m 2 1)
+
+#! 23.15
+(define (make-array dimension-list)
+  (let ((base-vector (make-vector (car dimension-list))))
+    (make-array-helper (cdr dimension-list) base-vector base-vector)))
+
+(define (array-set! array index-list value)
+  1)
+
+(define (array-ref array index-list)
+  1)
+
+(define (make-array-helper dimension-list base-vector current-vector)
+  (if (null? dimension-list)
+      base-vector
+      (begin
+        (make-vector-for-each-index (car dimension-list) current-vector)
+        (vector-for-each-index (lambda (index)
+                                 (make-array-helper
+                                  (cdr dimension-list)
+                                  base-vector
+                                  (vector-ref current-vector index)))
+                               current-vector)
+        base-vector)))
+
+(define (vector-for-each-index fn vec)
+  (for-each fn (range 0 (- (vector-length vec) 1))))
+
+(define (make-vector-for-each-index num-items vec)
+  (vector-for-each-index (lambda (index)
+                           (vector-set! vec index (make-vector num-items)))
+                         vec))
+
+;;(trace make-array-helper)
+(define a1 (make-array '(1 2 3)))
+(vector-ref a1 0)
+(vector-ref (vector-ref a1 0) 1)
+(vector-ref (vector-ref (vector-ref a1 0) 1) 2)
