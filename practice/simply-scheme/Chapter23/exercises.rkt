@@ -374,15 +374,23 @@ which is not the intent of vector-swap.
 (matrix-ref m 2 1)
 
 #! 23.15
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Main array interface
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (make-array dimension-list)
   (let ((base-vector (make-vector (car dimension-list))))
     (make-array-helper (cdr dimension-list) base-vector base-vector)))
 
 (define (array-set! array index-list value)
-  1)
+  (array-set-helper array index-list value))
 
 (define (array-ref array index-list)
-  1)
+  (array-ref-helper array index-list))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helper functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (make-array-helper dimension-list base-vector current-vector)
   (if (null? dimension-list)
@@ -405,8 +413,31 @@ which is not the intent of vector-swap.
                            (vector-set! vec index (make-vector num-items)))
                          vec))
 
+(define (array-set-helper vec index-list value)
+  (if (null? (cdr index-list))
+      (vector-set! vec (car index-list) value)
+      (array-set-helper (vector-ref vec (car index-list)) (cdr index-list) value)))
+
+(define (array-ref-helper vec index-list)
+  (if (null? (cdr index-list))
+      (vector-ref vec (car index-list))
+      (array-ref-helper (vector-ref vec (car index-list)) (cdr index-list))))
+
 ;;(trace make-array-helper)
-(define a1 (make-array '(1 2 3)))
-(vector-ref a1 0)
-(vector-ref (vector-ref a1 0) 1)
-(vector-ref (vector-ref (vector-ref a1 0) 1) 2)
+(define a0 (make-array '(1 2 3)))
+(vector-ref a0 0)
+(vector-ref (vector-ref a0 0) 1)
+(vector-ref (vector-ref (vector-ref a0 0) 1) 2)
+
+;;(trace array-set-helper)
+(array-set! a0 '(0 0 0) 'x0-y0-z0)
+(array-set! a0 '(0 0 1) 'x0-y0-z1)
+(array-set! a0 '(0 0 2) 'x0-y0-z2)
+(array-set! a0 '(0 1 0) 'x0-y1-z0)
+(array-set! a0 '(0 1 1) 'x0-y1-z1)
+(array-set! a0 '(0 1 2) 'x0-y1-z2)
+(show a0)
+
+(define a1 (make-array '(4 5 6)))
+(array-set! a1 '(3 2 3) '(the end))
+(show a1) ;; Not as friendly...
