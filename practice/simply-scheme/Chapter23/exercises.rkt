@@ -441,3 +441,67 @@ which is not the intent of vector-swap.
 (define a1 (make-array '(4 5 6)))
 (array-set! a1 '(3 2 3) '(the end))
 (show a1) ;; Not as friendly...
+
+#! 23.16
+#! (a)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Main sentence interface
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (vec-sentence . rest)
+  (let ((num-items (length rest)))
+    (let ((vec (make-vector num-items)))
+      (vec-sentence-helper vec rest 0)
+      vec)))
+
+(define (vec-empty? vec)
+  (= (vector-length vec) 0))
+
+(define (vec-first vec)
+  (vector-ref vec 0))
+
+(define (vec-butfirst from-vector)
+  (one-less-vector-filler from-vector 1))
+
+(define (vec-last vec)
+  (let ((last-index (- (vector-length vec) 1)))
+    (vector-ref vec last-index)))
+
+(define (vec-butlast from-vector)
+  (one-less-vector-filler from-vector 0))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helper functions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (vec-sentence-helper vec rest index)
+  (if (null? rest)
+      vec
+      (begin
+        (vector-set! vec index (car rest))
+        (vec-sentence-helper vec (cdr rest) (+ index 1)))))
+
+;; TODO: May want to play with this for more general purpose.
+(define (one-less-vector-filler from-vector from-index)
+  (let ((num-items (vector-length from-vector)))
+    (let ((to-vector (make-vector (- num-items 1)))
+          (num-to-copy (- num-items 1)))
+      (vec-build-helper from-vector from-index to-vector 0 num-to-copy))))
+
+(define (vec-build-helper from-vector from-index to-vector to-index remaining)
+  (if (= remaining 0)
+      to-vector
+      (begin
+        (vector-set! to-vector to-index (vector-ref from-vector from-index))
+        (vec-build-helper from-vector (+ from-index 1) to-vector (+ to-index 1) (- remaining 1)))))
+
+(vec-sentence 1 2 3)
+
+(vec-empty? #())
+(vec-empty? #(1))
+
+(vec-first #(1 2 3))
+(vec-last #(1 2 3))
+(vec-sentence 'a 'b 'c)
+(vec-butfirst (vec-sentence 'a 'b 'c))
+(vec-butlast (vec-sentence 'a 'b 'c))
+
