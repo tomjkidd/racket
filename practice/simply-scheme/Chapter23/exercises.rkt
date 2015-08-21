@@ -505,3 +505,65 @@ which is not the intent of vector-swap.
 (vec-butfirst (vec-sentence 'a 'b 'c))
 (vec-butlast (vec-sentence 'a 'b 'c))
 
+#! (b)
+(define (praise stuff)
+  (sentence stuff '(is good)))
+
+(praise 'music)
+(praise '(a b c))
+
+(define (vec-praise stuff)
+  (vec-concatenate stuff #(is good)))
+
+(define (vec-concatenate vec-a vec-b)
+  (let ((new (make-vector (+ (vector-length vec-a) (vector-length vec-b)))))
+    (vec-filler vec-a 0 new 0 (vector-length vec-a))
+    (vec-filler vec-b 0 new (vector-length vec-a) (vector-length vec-b))))
+
+(define (vec-filler from-vector from-index to-vector to-index remaining)
+  (if (= remaining 0)
+      to-vector
+      (begin
+        (vector-set! to-vector to-index (vector-ref from-vector from-index))
+        (vec-filler from-vector (+ from-index 1) to-vector (+ to-index 1) (- remaining 1)))))
+
+(vec-praise (vec-sentence 'music))
+(vec-praise (vec-sentence 'a 'b 'c))
+
+#! (c)
+(define (vec-praise-2 stuff)
+  (vec-concatenate stuff #(rules!)))
+(vec-praise-2 (vec-sentence 'music))
+(vec-praise-2 (vec-sentence 'a 'b 'c))
+
+#! (d)
+(define (vec-item n vec)
+  (if (= n 1)
+      (vec-first vec)
+      (vec-item (- n 1) (vec-butfirst vec))))
+
+(vec-item 1 (vec-sentence 'a 'b 'c))
+(vec-item 2 (vec-sentence 'a 'b 'c))
+(vec-item 3 (vec-sentence 'a 'b 'c))
+
+(define (vec-item-2 n vec)
+  (vector-ref vec (- n 1)))
+
+(vec-item-2 1 (vec-sentence 'a 'b 'c))
+(vec-item-2 2 (vec-sentence 'a 'b 'c))
+(vec-item-2 3 (vec-sentence 'a 'b 'c))
+
+#! (e)
+;; TODO: Figure out the way that vec-sentence is supposed to handle various input
+;; In it's current form, the following does not work.
+;; There may be a way where if sentence is defined right it will work. Haven't ruled it out yet.
+(define (vec-every fn vec)
+  (if (vec-empty? vec)
+      vec
+      (vec-sentence (fn (vec-first vec))
+                    (vec-every fn (vec-butfirst vec)))))
+
+(trace vec-sentence)
+(trace vec-filler)
+(vec-every (lambda (x) (* x 2)) #(1 2 3))
+
