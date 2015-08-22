@@ -447,11 +447,15 @@ which is not the intent of vector-swap.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main sentence interface
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (vec-sentence . rest)
+(define (vec-sentence-first-try . rest)
   (let ((num-items (length rest)))
     (let ((vec (make-vector num-items)))
       (vec-sentence-helper vec rest 0)
       vec)))
+
+(define (vec-sentence . lst)
+  (let ((vecs (map (lambda (x) (ensure-vector x)) lst)))
+    (accumulate (lambda (x y) (vec-concatenate x y)) vecs)))
 
 (define (vec-empty? vec)
   (= (vector-length vec) 0))
@@ -494,27 +498,6 @@ which is not the intent of vector-swap.
         (vector-set! to-vector to-index (vector-ref from-vector from-index))
         (vec-build-helper from-vector (+ from-index 1) to-vector (+ to-index 1) (- remaining 1)))))
 
-(vec-sentence 1 2 3)
-
-(vec-empty? #())
-(vec-empty? #(1))
-
-(vec-first #(1 2 3))
-(vec-last #(1 2 3))
-(vec-sentence 'a 'b 'c)
-(vec-butfirst (vec-sentence 'a 'b 'c))
-(vec-butlast (vec-sentence 'a 'b 'c))
-
-#! (b)
-(define (praise stuff)
-  (sentence stuff '(is good)))
-
-(praise 'music)
-(praise '(a b c))
-
-(define (vec-praise stuff)
-  (vec-concatenate stuff #(is good)))
-
 (define (vec-concatenate vec-a vec-b)
   (let ((new (make-vector (+ (vector-length vec-a) (vector-length vec-b)))))
     (vec-filler vec-a 0 new 0 (vector-length vec-a))
@@ -527,12 +510,43 @@ which is not the intent of vector-swap.
         (vector-set! to-vector to-index (vector-ref from-vector from-index))
         (vec-filler from-vector (+ from-index 1) to-vector (+ to-index 1) (- remaining 1)))))
 
+(define (ensure-vector maybe-vec)
+  (cond ((vector? maybe-vec) maybe-vec)
+        ((list? maybe-vec) (list->vector maybe-vec))
+        (else (make-vector 1 maybe-vec))))
+
+(ensure-vector 'a)
+(ensure-vector '(1 2 3))
+(ensure-vector #(1 2 3))
+(vec-concatenate (ensure-vector 'a) (ensure-vector '(1 2)))
+(vec-sentence 1 2 3)
+(vec-sentence 'a 'b 'c #(1 2 3) '(4 5 6))
+
+(vec-empty? #())
+(vec-empty? #(1))
+
+(vec-first #(1 2 3))
+(vec-last #(1 2 3))
+(vec-sentence 'a 'b 'c)
+(vec-butfirst (vec-sentence 'a 'b 'c))
+(vec-butlast (vec-sentence 'a 'b 'c))
+
+#! (b)
+(define (praise stuff)
+  (vec-sentence stuff '(is good)))
+
+(praise 'music)
+(praise '(a b c))
+
+(define (vec-praise stuff)
+  (vec-sentence stuff #(is good)))
+
 (vec-praise (vec-sentence 'music))
 (vec-praise (vec-sentence 'a 'b 'c))
 
 #! (c)
 (define (vec-praise-2 stuff)
-  (vec-concatenate stuff #(rules!)))
+  (vec-sentence stuff #(rules!)))
 (vec-praise-2 (vec-sentence 'music))
 (vec-praise-2 (vec-sentence 'a 'b 'c))
 
@@ -546,6 +560,7 @@ which is not the intent of vector-swap.
 (vec-item 2 (vec-sentence 'a 'b 'c))
 (vec-item 3 (vec-sentence 'a 'b 'c))
 
+;; It is more efficient to use vector-ref to access the item directly.
 (define (vec-item-2 n vec)
   (vector-ref vec (- n 1)))
 
@@ -554,16 +569,56 @@ which is not the intent of vector-swap.
 (vec-item-2 3 (vec-sentence 'a 'b 'c))
 
 #! (e)
-;; TODO: Figure out the way that vec-sentence is supposed to handle various input
-;; In it's current form, the following does not work.
-;; There may be a way where if sentence is defined right it will work. Haven't ruled it out yet.
 (define (vec-every fn vec)
   (if (vec-empty? vec)
       vec
       (vec-sentence (fn (vec-first vec))
                     (vec-every fn (vec-butfirst vec)))))
+#|
+ Looking at how vec-every is defined...
 
-(trace vec-sentence)
-(trace vec-filler)
+ vec-sentence includes calling vec-concatenate,
+ which calls make-vector for each pair discovered in the list of arguments.
+
+ vec-first remains constant time, but vec-butfirst also has to create and fill a new vector,
+ and is called n-1 times.
+
+ It can be done better by making the vector once, and using vector-set!, which is a
+ constant time operation.
+|#
+(define (vec-every-2 fn vec)
+  (let ((new (make-vector (vector-length vec))))
+    (vec-every-helper fn vec new (- (vector-length vec) 1))))
+
+(define (vec-every-helper fn vec new index)
+  (if (< index 0)
+      new
+      (begin
+        (vector-set! new index (fn (vector-ref vec index)))
+        (vec-every-helper fn vec new (- index 1)))))
+
+;;(trace vec-sentence)
+;;(trace vec-filler)
 (vec-every (lambda (x) (* x 2)) #(1 2 3))
+(vec-every-2 (lambda (x) (* x 2)) #(1 2 3))
 
+#! (f)
+#|
+ The constant time operations for vector: vector-ref, vector-set!, vector-length
+ The constant time operations for list: cons, car, cdr, null?
+
+ selectors:
+ {vector-ref, vector-set!}
+ {list-ref, car, cdr}
+
+ constructors:
+ {make-vector}
+ {cons}
+
+ Using vectors to implement sentences makes the selectors fast, but the constructor is
+ slow.
+
+ I assume lists were used because the desire was to construct and perform operations on
+ whole sentences, not to find single words in them. This would mean cons, car, and cdr
+ being fast is sufficient, which are the constant time operations for lists.
+|#
