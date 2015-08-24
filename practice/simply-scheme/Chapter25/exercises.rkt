@@ -2,6 +2,9 @@
 (require (planet dyoo/simply-scheme:2))
 (require racket/trace)
 
+(define total-cols 26)
+(define total-rows 40)
+
 (define (spreadsheet)
   (init-array)
   (set-selection-cell-id! (make-id 1 1))
@@ -48,7 +51,7 @@
 
 (define (next-row delta)
   (let ((row (id-row (selection-cell-id))))
-    (if (> (+ row delta) 30)
+    (if (> (+ row delta) total-rows)
 	(error "Already at bottom.")
 	(set-selected-row! (+ row delta)))))
 
@@ -60,7 +63,7 @@
 
 (define (next-col delta)
   (let ((col (id-column (selection-cell-id))))
-    (if (> (+ col delta) 26)
+    (if (> (+ col delta) total-cols)
 	(error "Already at right.")
 	(set-selected-column! (+ col delta)))))
 
@@ -132,10 +135,10 @@
 	(else (error "Put it where?"))))
 
 (define (put-all-cells-in-row formula row)
-  (put-all-helper formula (lambda (col) (make-id col row)) 1 26))
+  (put-all-helper formula (lambda (col) (make-id col row)) 1 total-cols))
 
 (define (put-all-cells-in-col formula col)
-  (put-all-helper formula (lambda (row) (make-id col row)) 1 30))
+  (put-all-helper formula (lambda (row) (make-id col row)) 1 total-rows))
 
 (define (put-all-helper formula id-maker this max)
   (if (> this max)
@@ -204,7 +207,7 @@
 	(else
 	 (let ((col (pin-down-col (car args) (id-column reference-id)))
 	       (row (pin-down-row (cadr args) (id-row reference-id))))
-	   (if (and (>= col 1) (<= col 26) (>= row 1) (<= row 30))
+	   (if (and (>= col 1) (<= col total-cols) (>= row 1) (<= row total-rows))
 	       (make-id col row)
 	       'out-of-bounds)))))
 
@@ -494,23 +497,23 @@
 (define (cell-structure-from-indices col row)
   (global-array-lookup col row))
 
-(define *the-spreadsheet-array* (make-vector 30))
+(define *the-spreadsheet-array* (make-vector total-rows))
 
 (define (global-array-lookup col row)
-  (if (and (<= row 30) (<= col 26))
+  (if (and (<= row total-rows) (<= col total-cols))
       (vector-ref (vector-ref *the-spreadsheet-array* (- row 1))
 		  (- col 1))
       (error "Out of bounds")))
 
 (define (init-array)
-  (fill-array-with-rows 29))
+  (fill-array-with-rows (- total-rows 1)))
 
 (define (fill-array-with-rows n)
   (if (< n 0)
       'done
-      (begin (vector-set! *the-spreadsheet-array* n (make-vector 26))
+      (begin (vector-set! *the-spreadsheet-array* n (make-vector total-cols))
 	     (fill-row-with-cells
-	      (vector-ref *the-spreadsheet-array* n) 25)
+	      (vector-ref *the-spreadsheet-array* n) (- total-cols 1))
 	     (fill-array-with-rows (- n 1)))))
 
 (define (fill-row-with-cells vec n)
@@ -553,4 +556,12 @@
   (filter (lambda (item) (not (equal? item bad-item)))
 	  lst))
 
+#! 25.1
+#|
+The only trick was to do find-replace:
+26 -> total-cols
+30 -> total-rows
+25 -> (- total-cols 1)
+29 -> (- total-rows 1)
+|#
 (spreadsheet)
