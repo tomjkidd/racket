@@ -564,4 +564,59 @@ The only trick was to do find-replace:
 25 -> (- total-cols 1)
 29 -> (- total-rows 1)
 |#
-(spreadsheet)
+;;(spreadsheet)
+
+#! 25.2
+#|
+In a style similar to binary or hex, you could use the alphabet as a counting system
+binary
+------
+0
+1
+10
+11
+100
+101
+110
+111
+1000
+
+using the alphabet
+------------------
+map each letter to a number. Note that a program like excel goes to aa after z.
+This seems reasonable enough for a system to model
+
+a -> 1
+b -> 2
+c -> 3
+d -> 4
+...
+x -> 24
+y -> 25
+z -> 26
+aa -> 27
+ab -> 28 ...
+|#
+
+(define (col-name->num col-name)
+  (col-name-helper 0 (string->list (string-upcase col-name))))
+
+(define (char-diff char1 char2)
+  (let ((int-1 (char->integer char1))
+        (int-2 (char->integer char2)))
+    (- int-1 int-2)))
+
+(define (char-diff-from-A char)
+  (char-diff char #\A))
+
+(define (col-name-helper num remaining)
+  (if (null? remaining)
+      num
+      (let ((next-num (+ (* num 26) (char-diff-from-A (car remaining)) 1)))
+        (col-name-helper next-num (cdr remaining)))))
+    
+(col-name->num "A")
+(col-name->num "Z")
+(col-name->num "AA")
+(col-name->num "AH")
+(col-name->num "XFD")
