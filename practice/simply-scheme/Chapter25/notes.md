@@ -38,6 +38,38 @@ Types
 Id -> (list 'id col row)
 Cell -> (vector '() '() '() '()), 0: value,
 
+Commands
+--------
+(prev-row delta) -> sets the selected row to current minus delta
+(next-row delta) -> sets the selected row to current plus delta
+(prev-col delta) -> sets the selected col to current minus delta
+(next-col delta) -> sets the selected col to current plus delta
+
+(set-selected-row! new-row) -> sets the selected row value
+(set-selected-col! new-column) -> sets the selected col value
+(select-id! id) -> sets selection cell and adjusts screen boundaries
+(select cell-name) -> sets the selection cell based on cell name.
+(adjust-screen-boundaries) -> sets the page for what to display
+(set-corner-row! new-row) -> sets row of screen corner cell
+(set-corner-col! new-column) -> sets the col of the screen corner cell
+
+Load
+----
+(spreadsheet-load filename) -> loads file and runs each command from that file
+
+Print Screen
+------------
+(print-screen) -> void, displays the determined grid/selection
+(show-column-lables col-number) -> void, displays the column labels
+(display-cell-name id) -> void, displays the cell-name, like a1
+(show-label to-go col) -> shows a column label, like _____a_____
+(show-rows to-go col row)
+(show-row to-go col row)
+(selected-indices? col row) -> checks if a col/row together identify the selected Cell
+(display-value val) -> uses align to truncate if necessary.
+(display-expression expr) -> displays an expression
+(display-invocation expr) -> displays an invocation (when a function is applied)
+
 Cell Names
 ----------
 (cell-name? expr) -> bool. Assumes that (first expr) is a letter and (bf expr) is a number.
