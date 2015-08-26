@@ -625,3 +625,79 @@ cell-name-row assumes butfirst on name is all row number. This would need to cha
 (col-name->num "aa")
 (col-name->num "ah")
 (col-name->num "xfd")
+
+#! 25.3
+#| Copied definitions for reference:
+
+(define *the-spreadsheet-array* (make-vector total-rows))
+
+(define (global-array-lookup col row)
+  (if (and (<= row total-rows) (<= col total-cols))
+      (vector-ref (vector-ref *the-spreadsheet-array* (- row 1))
+		  (- col 1))
+      (error "Out of bounds")))
+
+(define (init-array)
+  (fill-array-with-rows (- total-rows 1)))
+
+(define (fill-array-with-rows n)
+  (if (< n 0)
+      'done
+      (begin (vector-set! *the-spreadsheet-array* n (make-vector total-cols))
+	     (fill-row-with-cells
+	      (vector-ref *the-spreadsheet-array* n) (- total-cols 1))
+	     (fill-array-with-rows (- n 1)))))
+
+(define (fill-row-with-cells vec n)
+  (if (< n 0)
+      'done
+      (begin (vector-set! vec n (make-cell))
+	     (fill-row-with-cells vec (- n 1)))))
+
+In order get things working for a single array, the array of arrays must be
+mapped in some way to a single array.
+
+(col, row) -> index of array
+
+The most natural way I know to do this is to enumerate by col, then row.
+[
+  [1 2 3]
+  [4 5 6]
+  [7 8 9]
+]
+Note: For now col and row are 0 indexed!
+So, (get-index col row) -> (+ (* number-of-colums row) col)
+(get-index 1 0) -> (+ (* 3 0) 1) = 1
+(get-index 1 1) -> (+ (* 3 1) 1) = 4
+
+TODO: Change init-array and global-array-lookup to use new mapping.
+
+|#
+
+#! 25.4
+#|
+Copied the definitions for reference:
+
+(define (get-command name)
+  (let ((result (assoc name *the-commands*)))
+    (if (not result)
+        #f
+        (cadr result))))
+
+(define (get-function name)
+  (let ((result (assoc name *the-functions*)))
+    (if (not result)
+	(error "No such function: " name)
+	(cadr result))))
+
+get-command returns false, while get-function produces an error.
+
+process-command uses a cond to determine if what the user provides is valid.
+If valid, execute-command is called, which uses get-command.
+If not valid, get-command isn't called.
+
+ss-eval is the only place where get-function is used.
+ss-eval is attempted if there is no command match in process-command.
+ss-eval will encounter the error produced by get-function when trying to handle
+an invalid user command.
+|#

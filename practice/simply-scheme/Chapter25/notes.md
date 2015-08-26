@@ -57,6 +57,23 @@ Load
 ----
 (spreadsheet-load filename) -> loads file and runs each command from that file
 
+Put
+---
+(put formula . where) -> determines which helper to call to fulfill put
+(put-formula-in-cell formula cell-id) -> (put-expr (pin-down formula id) id)
+(put-all-cells-in-row formula row) ->
+(put-all-cells-in-col formula col) ->
+
+
+Pin Down Formulas into Expressions
+----------------------------------
+(pin-down formula id) ->
+
+Evaluating Expressions
+----------------------
+(ss-eval expr) ->
+*the-functions* -> list of lists (where first element is the name of a function, and the second element is the function.)
+
 Print Screen
 ------------
 (print-screen) -> void, displays the determined grid/selection
