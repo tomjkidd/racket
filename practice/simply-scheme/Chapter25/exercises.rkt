@@ -21,12 +21,12 @@
 
 (define (process-command command-or-formula)
   (cond ((and (list? command-or-formula)
-	      (command? (car command-or-formula)))
-	 (execute-command command-or-formula))
-	((command? command-or-formula)
-	 (execute-command (list command-or-formula 1)))
-	(else (exhibit (ss-eval (pin-down command-or-formula
-					  (selection-cell-id)))))))
+              (command? (car command-or-formula)))
+         (execute-command command-or-formula))
+        ((command? command-or-formula)
+         (execute-command (list command-or-formula 1)))
+        (else (exhibit (ss-eval (pin-down command-or-formula
+                                          (selection-cell-id)))))))
 
 (define (execute-command command)
   (apply (get-command (car command))
@@ -163,30 +163,30 @@
 (define (get-command name)
   (let ((result (assoc name *the-commands*)))
     (if (not result)
-	#f
-	(cadr result))))
+        #f
+        (cadr result))))
 
 (define *the-commands*
   (list (list 'p prev-row)
-	(list 'n next-row)
-	(list 'b prev-col)
-	(list 'f next-col)
-	(list 'select select)
-	(list 'put put)
-	(list 'load spreadsheet-load)))
+        (list 'n next-row)
+        (list 'b prev-col)
+        (list 'f next-col)
+        (list 'select select)
+        (list 'put put)
+        (list 'load spreadsheet-load)))
 
 
 ;;; Pinning Down Formulas Into Expressions
 
 (define (pin-down formula id)
   (cond ((cell-name? formula) (cell-name->id formula))
-	((word? formula) formula)
-	((null? formula) '())
-	((equal? (car formula) 'cell)
-	 (pin-down-cell (cdr formula) id))
-	(else (bound-check
-	       (map (lambda (subformula) (pin-down subformula id))
-		    formula)))))
+        ((word? formula) formula)
+        ((null? formula) '())
+        ((equal? (car formula) 'cell)
+         (pin-down-cell (cdr formula) id))
+        (else (bound-check
+               (map (lambda (subformula) (pin-down subformula id))
+                    formula)))))
 
 (define (bound-check form)
   (if (member 'out-of-bounds form)
@@ -235,7 +235,7 @@
     (for-each (lambda (old-parent)
 		(set-cell-children!
 		 old-parent
-		 (remove-id id (cell-children old-parent))))
+		 (rmv id (cell-children old-parent))))
 	      (cell-parents id))
     (set-cell-expr! id expr)
     (set-cell-parents! id (remdup (extract-ids expr)))
@@ -552,7 +552,7 @@
 	 (remdup (cdr lst)))
 	(else (cons (car lst) (remdup (cdr lst))))))
 
-(define (remove-id bad-item lst)
+(define (rmv bad-item lst)
   (filter (lambda (item) (not (equal? item bad-item)))
 	  lst))
 
@@ -596,6 +596,11 @@ y -> 25
 z -> 26
 aa -> 27
 ab -> 28 ...
+
+Which functions need to change to support this?
+cell-name? assumes single character for letter/number. This would need to change.
+cell-name-column would also makes a similar letter assumption.
+cell-name-row assumes butfirst on name is all row number. This would need to change, too
 |#
 
 (define (col-name->num col-name)
@@ -615,8 +620,8 @@ ab -> 28 ...
       (let ((next-num (+ (* num 26) (char-diff-from-A (car remaining)) 1)))
         (col-name-helper next-num (cdr remaining)))))
     
-(col-name->num "A")
-(col-name->num "Z")
-(col-name->num "AA")
-(col-name->num "AH")
-(col-name->num "XFD")
+(col-name->num "a")
+(col-name->num "z")
+(col-name->num "aa")
+(col-name->num "ah")
+(col-name->num "xfd")
