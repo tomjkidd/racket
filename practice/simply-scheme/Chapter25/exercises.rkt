@@ -262,7 +262,7 @@
 (define (all-evaluated? ids)
   (cond ((null? ids) #t)
 	((not (number? (cell-value (car ids)))) #f)
-	(else (a ll-evaluated? (cdr ids)))))
+	(else (all-evaluated? (cdr ids)))))
 
 (define (setvalue id value)
   (let ((old (cell-value id)))
@@ -700,4 +700,52 @@ ss-eval is the only place where get-function is used.
 ss-eval is attempted if there is no command match in process-command.
 ss-eval will encounter the error produced by get-function when trying to handle
 an invalid user command.
+|#
+
+#! 25.6
+#|
+When a command is issued like:
+(put 'test)
+
+In the put call, the first condition matches, so put-formula-in-cell is called.
+put-formula-in-cell will pass it's result to pin-down.
+
+How is the formula translated into an expression?
+The formula is a word.
+pin-down evaluates the word? condition, which just provides the word as the expression.
+
+How is that expression evaluated?
+This word then goes to put-expr, which uses the word as it's value.
+
+What if the labeled cell has children?
+
+TODO: If you type exit into the console, the state of the table remains,
+you can then use commands like (global-array-lookup 1 1) to investigate cells.
+Create a case to investigate this scenario.
+
+|#
+(trace get-command)
+(trace put)
+;; NOTE: put is not traced due to apply being used to call it! Didn't expect that.
+(trace put-formula-in-cell)
+(trace pin-down) ;; -> ''test
+(trace put-expr)
+(trace set-cell-expr!)
+
+#|
+
+>(get-command 'put)
+<#<procedure:put>
+>(put-formula-in-cell ''test '(id 1 1))
+> (pin-down ''test '(id 1 1))
+> >(pin-down 'quote '(id 1 1))
+< <'quote
+> >(pin-down 'test '(id 1 1))
+< <'test
+< ''test
+>(put-expr ''test '(id 1 1))
+> (set-cell-expr! '(id 1 1) ''test)
+< #<void>
+<#<void>
+
 |#
