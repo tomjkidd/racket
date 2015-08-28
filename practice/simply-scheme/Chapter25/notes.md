@@ -37,6 +37,14 @@ Types
 -----
 Id -> (list 'id col row)
 Cell -> (vector '() '() '() '()), 0: value,
+(expression: a formula whose cell references have been replaced by specific cell IDs. Expressions are put into cells.
+  Expressions are 1 of 3 things:
+  1. A constant expression
+  2. A variable, cell ID
+  3. A procedure invocation enclosed in parentheses.
+  The evaluator is functional, doesn't modify state of the spreadsheet)
+(pin down: the process of translating a formula to an expression)
+(evaluator: takes an expression and computes a value)
 
 Commands
 --------
@@ -68,10 +76,18 @@ Put
 Pin Down Formulas into Expressions
 ----------------------------------
 (pin-down formula id) ->
+(bound-check form) ->
+(pin-down-cell args reference-id) ->
+(pin-down-col new old) ->
+(pin-down-row new old) ->
+
+Dependency Management
+---------------------
+(put-expr expr-or-out-of-bounds id) -> puts an expression in a cell, removes cell from previous parents, sets the expression used to generate the cell, sets dependecies to see it as a parent, sets new parents to hold it as a child, and compute the new value for the cell.
 
 Evaluating Expressions
 ----------------------
-(ss-eval expr) ->
+(ss-eval expr) -> converts an expression to it's value
 *the-functions* -> list of lists (where first element is the name of a function, and the second element is the function.)
 
 Print Screen

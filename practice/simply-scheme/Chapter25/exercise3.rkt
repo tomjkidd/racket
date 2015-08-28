@@ -262,7 +262,7 @@
 (define (all-evaluated? ids)
   (cond ((null? ids) #t)
 	((not (number? (cell-value (car ids)))) #f)
-	(else (a ll-evaluated? (cdr ids)))))
+	(else (all-evaluated? (cdr ids)))))
 
 (define (setvalue id value)
   (let ((old (cell-value id)))
@@ -404,7 +404,7 @@
 	      (display-expression subexpr))
 	    (cdr expr))
   (display ")"))
-      
+
 
 ;;; Abstract Data Types
 
@@ -441,7 +441,7 @@
 (define (cell-name->id cell-name)
   (make-id (cell-name-column cell-name)
 	   (cell-name-row cell-name)))
-	
+
 ;; Cell IDs
 
 (define (make-id col row)
@@ -497,17 +497,6 @@
 (define (cell-structure-from-indices col row)
   (global-array-lookup col row))
 
-(define *the-spreadsheet-array* (make-vector total-rows))
-
-(define (global-array-lookup col row)
-  (if (and (<= row total-rows) (<= col total-cols))
-      (vector-ref (vector-ref *the-spreadsheet-array* (- row 1))
-		  (- col 1))
-      (error "Out of bounds")))
-
-(define (init-array)
-  (fill-array-with-rows (- total-rows 1)))
-
 (define (fill-array-with-rows n)
   (if (< n 0)
       'done
@@ -556,103 +545,9 @@
   (filter (lambda (item) (not (equal? item bad-item)))
 	  lst))
 
-#! 25.1
-#|
-The only trick was to do find-replace:
-26 -> total-cols
-30 -> total-rows
-25 -> (- total-cols 1)
-29 -> (- total-rows 1)
-|#
-;;(spreadsheet)
-
-#! 25.2
-#|
-In a style similar to binary or hex, you could use the alphabet as a counting system
-binary
-------
-0
-1
-10
-11
-100
-101
-110
-111
-1000
-
-using the alphabet
-------------------
-map each letter to a number. Note that a program like excel goes to aa after z.
-This seems reasonable enough for a system to model
-
-a -> 1
-b -> 2
-c -> 3
-d -> 4
-...
-x -> 24
-y -> 25
-z -> 26
-aa -> 27
-ab -> 28 ...
-
-Which functions need to change to support this?
-cell-name? assumes single character for letter/number. This would need to change.
-cell-name-column would also makes a similar letter assumption.
-cell-name-row assumes butfirst on name is all row number. This would need to change, too
-|#
-
-(define (col-name->num col-name)
-  (col-name-helper 0 (string->list (string-upcase col-name))))
-
-(define (char-diff char1 char2)
-  (let ((int-1 (char->integer char1))
-        (int-2 (char->integer char2)))
-    (- int-1 int-2)))
-
-(define (char-diff-from-A char)
-  (char-diff char #\A))
-
-(define (col-name-helper num remaining)
-  (if (null? remaining)
-      num
-      (let ((next-num (+ (* num 26) (char-diff-from-A (car remaining)) 1)))
-        (col-name-helper next-num (cdr remaining)))))
-    
-(col-name->num "a")
-(col-name->num "z")
-(col-name->num "aa")
-(col-name->num "ah")
-(col-name->num "xfd")
 
 #! 25.3
-#| Copied definitions for reference:
-
-(define *the-spreadsheet-array* (make-vector total-rows))
-
-(define (global-array-lookup col row)
-  (if (and (<= row total-rows) (<= col total-cols))
-      (vector-ref (vector-ref *the-spreadsheet-array* (- row 1))
-		  (- col 1))
-      (error "Out of bounds")))
-
-(define (init-array)
-  (fill-array-with-rows (- total-rows 1)))
-
-(define (fill-array-with-rows n)
-  (if (< n 0)
-      'done
-      (begin (vector-set! *the-spreadsheet-array* n (make-vector total-cols))
-	     (fill-row-with-cells
-	      (vector-ref *the-spreadsheet-array* n) (- total-cols 1))
-	     (fill-array-with-rows (- n 1)))))
-
-(define (fill-row-with-cells vec n)
-  (if (< n 0)
-      'done
-      (begin (vector-set! vec n (make-cell))
-	     (fill-row-with-cells vec (- n 1)))))
+#|
 
 In order get things working for a single array, the array of arrays must be
 mapped in some way to a single array.
@@ -670,34 +565,25 @@ So, (get-index col row) -> (+ (* number-of-colums row) col)
 (get-index 1 0) -> (+ (* 3 0) 1) = 1
 (get-index 1 1) -> (+ (* 3 1) 1) = 4
 
+To get index from 1 based, just subtract 1 from row and col first.
+
+(col, row) -> (+ (* (- row 1) total-cols) (- col 1)))
+
 TODO: Change init-array and global-array-lookup to use new mapping.
 
 |#
 
-#! 25.4
-#|
-Copied the definitions for reference:
+;; Create a single vector of that is product of rows and columns
+(define *the-spreadsheet-array*
+  (make-vector (* total-rows total-cols)))
 
-(define (get-command name)
-  (let ((result (assoc name *the-commands*)))
-    (if (not result)
-        #f
-        (cadr result))))
+;; Use existing fill-row-with-cells, now over the entire new vector
+(define (init-array)
+  (fill-row-with-cells *the-spreadsheet-array* (- (* total-rows total-cols) 1)))
 
-(define (get-function name)
-  (let ((result (assoc name *the-functions*)))
-    (if (not result)
-	(error "No such function: " name)
-	(cadr result))))
-
-get-command returns false, while get-function produces an error.
-
-process-command uses a cond to determine if what the user provides is valid.
-If valid, execute-command is called, which uses get-command.
-If not valid, get-command isn't called.
-
-ss-eval is the only place where get-function is used.
-ss-eval is attempted if there is no command match in process-command.
-ss-eval will encounter the error produced by get-function when trying to handle
-an invalid user command.
-|#
+;; Update global-array-lookup to map the col and row to an index, the right cell
+(define (global-array-lookup col row)
+  (if (and (<= row total-rows) (<= col total-cols))
+      (let ((index (+ (* (- row 1) total-cols) (- col 1))))
+        (vector-ref *the-spreadsheet-array* index))
+      (error "Out of bounds")))
