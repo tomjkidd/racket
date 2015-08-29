@@ -126,6 +126,8 @@
 (define (put formula . where)
   (cond ((null? where)
          (put-formula-in-cell formula (selection-cell-id)))
+        ((equal? 'all-by-row (car where))
+         (put-all-by-row formula))
         ((cell-name? (car where))
          (put-formula-in-cell formula (cell-name->id (car where))))
         ((number? (car where))
@@ -147,6 +149,13 @@
        (put-all-helper formula id-maker (+ 1 this) max))))
 
 (define (try-putting formula id)
+  (cond ((equal? 'done id) 'do-nothing)
+        ((or (null? (cell-value id)) (null? formula))
+         (put-formula-in-cell formula id))
+        (else 'do-nothing)))
+
+;; I changed the definition of try-putting to support a fill all cells with a formula.
+(define (try-putting-legacy formula id)
   (if (or (null? (cell-value id)) (null? formula))
       (put-formula-in-cell formula id)
       'do-nothing))
@@ -154,6 +163,8 @@
 (define (put-formula-in-cell formula id)
   (put-expr (pin-down formula id) id))
 
+(define (put-all-by-row formula)
+  (put-all-helper formula (lambda (row) (put-all-cells-in-row formula row)) 1 total-rows))
 
 ;;; The Association List of Commands
 
@@ -604,6 +615,22 @@ Column B should compute tax, state tax rate
 Column C should compute 15% tip
 Column D should add A, B, and C for the total bill
 Coumnn E should be the same as D, rounded up to the next whole dollar amount
+
+Run the command (load "bills") to test
 |#
 
+#! 24.3
+#|
+Each element should be the sum of the number immediately above it and the
+number immediately to it's left.
+
+All of column a should have the value 1
+All of row 1 should have the value 1
+
+Run the command (load "pascal") to test
+|#
+;;(trace put-all-by-row)
+;;(trace put-all-cells-in-row)
+;;(trace put-all-helper)
+;;(trace try-putting)
 (spreadsheet)

@@ -1,0 +1,18 @@
+;; The put command's where argument can be null, a cell-name, a row number, or a column letter.
+;; Other where arguments are considered an error.
+;; I extended put to allow for all cells to be specified with all-by-row as the where argument.
+
+(put 1 a) ;; All of column a should have the value 1
+(put 1 1) ;; All of row 1 should have the value 1
+(put (+ (cell * <1) (cell <1 <0)) all-by-row)
+
+;; NOTE: This was the method before I added the all-by-row put mode
+;;(put (+ (cell * <1) (cell <1 <0)) 2)
+;;(put (+ (cell * <1) (cell <1 <0)) 3)
+;;(put (+ (cell * <1) (cell <1 <0)) 4)
+;;(put (+ (cell * <1) (cell <1 <0)) 5)
+;;(put (+ (cell * <1) (cell <1 <0)) 6)
+;;(put (+ (cell * <1) (cell <1 <0)) 7)
+;;(put (+ (cell * <1) (cell <1 <0)) 8)
+;;(put (+ (cell * <1) (cell <1 <0)) 9)
+;;(put (+ (cell * <1) (cell <1 <0)) 10)
