@@ -1,0 +1,21 @@
+(put 'DollarStart f1) ;; Set up constants
+(put 0.50 f2)
+(put 'DollarStep f3)
+(put 0.50 f4)
+(put 'TaxRate f5)
+(put 0.06 f6)
+(put 'TipRate f7)
+(put 0.15 f8)
+
+(put 'Pre-tax a1) ;; Add headers
+(put 'Tax b1)
+(put 'Tip c1)
+(put 'Total d1)
+(put 'Rounded e1)
+
+(put f2 a2) ;; Seed for bill
+(put (+ (cell * <1) f4) a) ;; Formula to fill out bill for rows
+(put (* (cell a) f6) b) ;; Tax
+(put (* (cell a) f8) c) ;; Tip
+(put (+ (cell a) (cell b) (cell c)) d) ;; Total
+(put (ceiling (cell d)) e) ;; Round up

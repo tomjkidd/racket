@@ -597,5 +597,13 @@ To load it...
  5  Ringo            74.00       74.00       74.00       74.00             
 |#
 
+#! 24.2
+#|
+Column A should be pre-tax amounts, [0.50, 10.00]
+Column B should compute tax, state tax rate
+Column C should compute 15% tip
+Column D should add A, B, and C for the total bill
+Coumnn E should be the same as D, rounded up to the next whole dollar amount
+|#
 
-
+(spreadsheet)
