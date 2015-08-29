@@ -723,6 +723,23 @@ TODO: If you type exit into the console, the state of the table remains,
 you can then use commands like (global-array-lookup 1 1) to investigate cells.
 Create a case to investigate this scenario.
 
+Enter the following commands after (spreadsheet)
+(put (+ a1 0) a2)
+(put 1 a1)
+(put 'test a1)
+exit
+
+> (global-array-lookup 2 1)
+'#(() () () ())
+> (global-array-lookup 1 2)
+'#(() (+ (id 1 1) 0) ((id 1 1)) ())
+> (global-array-lookup 1 1)
+'#(test 'test () ((id 1 2)))
+
+Note that the children are the third element of the cell, and even though the
+text has been put in, the dependency still is there.
+In this case the formula in the cell needs a number, so it is blank in the sheet.
+
 |#
 ;;(trace get-command)
 ;;(trace put)
