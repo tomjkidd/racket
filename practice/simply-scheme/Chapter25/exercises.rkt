@@ -724,14 +724,18 @@ you can then use commands like (global-array-lookup 1 1) to investigate cells.
 Create a case to investigate this scenario.
 
 |#
-(trace get-command)
-(trace put)
+;;(trace get-command)
+;;(trace put)
 ;; NOTE: put is not traced due to apply being used to call it! Didn't expect that.
-(trace put-formula-in-cell)
-(trace pin-down) ;; -> ''test
-(trace put-expr)
-(trace set-cell-expr!)
-
+;;(trace put-formula-in-cell)
+;;(trace pin-down) ;; -> ''test
+;;(trace put-expr)
+;;(trace set-cell-expr!)
+;;(trace cell-name?)
+;;(trace put-all-cells-in-col)
+;;(trace put-all-helper)
+;;(trace process-command)
+;;(trace global-array-lookup)
 #|
 
 >(get-command 'put)
@@ -747,5 +751,30 @@ Create a case to investigate this scenario.
 > (set-cell-expr! '(id 1 1) ''test)
 < #<void>
 <#<void>
+
+|#
+
+#|
+Valid commands
+(put 1 a) ;; -> put 1 in all cells in col a
+(put () a) ;; -> erase value from all cells in col a
+(put 2 1) ;; -> put 2 in all cells in row 1
+(put () 1) ;; -> erase value from all cells in row 1
+(select a1) ;; -> select cell a1
+
+(put (* (cell a) (cell b)) c) ;; -> store the product of col a and col b in col c for each row
+(put 2 a1) ;; -> put 2 in cell a1
+(put 6 b1) ;; -> put 6 in cell b1
+(select c1) ;; -> select cell c1 (to see expression and value)
+
+(put () b3)
+(put () c5)
+(put () d6)
+(put (+ b3 c5) d6)
+(put 2 b3)
+(put 3 c5)
+(select d6)
+(put 4 c5)
+(put () b3)
 
 |#

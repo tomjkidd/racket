@@ -1,0 +1,4 @@
+(put (* (cell a) (cell b)) c) ;; -> store the product of col a and col b in col c for each row
+(put 2 a1) ;; -> put 2 in cell a1
+(put 6 b1) ;; -> put 6 in cell b1
+(select c1) ;; -> select cell c1 (to see expression and value)

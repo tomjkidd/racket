@@ -153,3 +153,9 @@ Utilities
 (vector->member thing vector) -> index of thing in vector
 (remdup lst) -> lst with duplicates removed
 (rmv bad-item lst) -> remove bad-item from lst
+
+Constants
+---------
+*the-spreadsheet-array*
+total-cols
+total-rows
