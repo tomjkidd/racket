@@ -1,0 +1,26 @@
+(put 'NAME a1) ;; Add names for each row
+(put 'Paul a2)
+(put 'John a3)
+(put 'George a4)
+(put 'Ringo a5)
+
+(put 'Assign1 b1) ;; First assignment
+(put 71 b2)
+(put 72 b3)
+(put 73 b4)
+(put 74 b5)
+
+(put 'Assign2 c1) ;; Second assignment
+(put 71 c2)
+(put 72 c3)
+(put 73 c4)
+(put 74 c5)
+
+(put 'Assign3 d1) ;; Third assignment
+(put 71 d2)
+(put 72 d3)
+(put 73 d4)
+(put 74 d5)
+
+(put 'Avg e1) ;; Average of assignments
+(put (/ (+ (cell b) (cell c) (cell d)) 3) e)
