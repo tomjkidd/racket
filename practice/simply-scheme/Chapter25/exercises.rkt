@@ -154,6 +154,25 @@
 (define (put-formula-in-cell formula id)
   (put-expr (pin-down formula id) id))
 
+;; Window
+(define (window . where)
+  (cond ((cell-name? (car where))
+         (set-screen-corner-cell-id!
+          (ensure-valid-window-id (cell-name->id (car where)))))
+        (else (error "Window error..."))))
+
+(define (ensure-valid-window-id cell-id)
+  (let ((row-and-col (make-vector 2)))
+    (vector-set! row-and-col 0 (id-row cell-id))
+    (vector-set! row-and-col 1 (id-column cell-id))
+    
+    (if (> (+ 20 (vector-ref row-and-col 0)) total-rows)
+        (vector-set! row-and-col 0 (- total-rows 19))
+        'void)
+    (if (> (+ 6 (vector-ref row-and-col 1)) total-cols)
+        (vector-set! row-and-col 1 (- total-cols 5))
+        'void)
+    (make-id (vector-ref row-and-col 1) (vector-ref row-and-col 0))))
 
 ;;; The Association List of Commands
 
@@ -173,7 +192,8 @@
         (list 'f next-col)
         (list 'select select)
         (list 'put put)
-        (list 'load spreadsheet-load)))
+        (list 'load spreadsheet-load)
+        (list 'window window)))
 
 
 ;;; Pinning Down Formulas Into Expressions
@@ -794,4 +814,11 @@ Valid commands
 (put 4 c5)
 (put () b3)
 
+|#
+
+#! 25.7
+#|
+More notes in exercise7-notes.md...
+
+Created the window function
 |#
