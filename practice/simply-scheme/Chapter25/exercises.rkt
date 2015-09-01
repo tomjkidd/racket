@@ -160,20 +160,37 @@
 (define (window . where)
   (cond ((cell-name? (car where))
          (set-screen-corner-cell-id!
-          (ensure-valid-window-id (cell-name->id (car where)))))
+          (let ((cell-id (cell-name->id (car where))))
+            (ensure-valid-window-id (id-column cell-id)
+                                    (id-row cell-id)))))
+        ((and (number? (car where))
+              (not (null? (cdr where)))
+              (number? (cadr where)))
+         (set-screen-corner-cell-id!
+          (ensure-valid-window-id
+           (+ (id-column (screen-corner-cell-id)) (cadr where))
+           (+ (id-row (screen-corner-cell-id)) (car where)))))
         (else (error "Window error..."))))
 
-(define (ensure-valid-window-id cell-id)
+(define (ensure-valid-window-id new-row new-col)
   (let ((row-and-col (make-vector 2)))
-    (vector-set! row-and-col 0 (id-row cell-id))
-    (vector-set! row-and-col 1 (id-column cell-id))
+    (vector-set! row-and-col 0 new-row)
+    (vector-set! row-and-col 1 new-col)
     
     (if (> (+ window-rows (vector-ref row-and-col 0)) total-rows)
         (vector-set! row-and-col 0 (- total-rows 19))
         'void)
+    (if (< (vector-ref row-and-col 0) 1)
+        (vector-set! row-and-col 0 1)
+        'void)
+    
     (if (> (+ window-cols (vector-ref row-and-col 1)) total-cols)
         (vector-set! row-and-col 1 (- total-cols 5))
         'void)
+    (if (< (vector-ref row-and-col 1) 1)
+        (vector-set! row-and-col 1 1)
+        'void)
+    
     (make-id (vector-ref row-and-col 1) (vector-ref row-and-col 0))))
 
 ;;; The Association List of Commands
@@ -824,3 +841,4 @@ More notes in exercise7-notes.md...
 
 Created the window function
 |#
+;;(trace ensure-valid-window-id)
