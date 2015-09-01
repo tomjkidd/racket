@@ -13,6 +13,12 @@
 (define (clear-modified-counter)
   (set! modified-counter 0))
 
+(define number-of-digits-vector (make-vector total-cols 2))
+(define (number-of-digits-set! col value)
+  (vector-set! number-of-digits-vector (- col 1) value))
+(define (number-of-digits-ref col)
+  (vector-ref number-of-digits-vector (- col 1)))
+
 (define (spreadsheet)
   (init-array)
   (set-selection-cell-id! (make-id 1 1))
@@ -430,7 +436,7 @@
   (cond ((= to-go 0) 'done)
 	(else
 	   (display (if (selected-indices? col row) ">" " "))
-	   (display-value (cell-value-from-indices col row))
+	   (display-value (cell-value-from-indices col row) (number-of-digits-ref col))
 	   (display (if (selected-indices? col row) "<" " "))
 	   (show-row (- to-go 1) (+ 1 col) row))))
 
@@ -438,8 +444,8 @@
   (and (= col (id-column (selection-cell-id)))
        (= row (id-row (selection-cell-id)))))
 
-(define (display-value val)
-  (display (align (if (null? val) "" val) 10 2)))
+(define (display-value val num-digits)
+  (display (align (if (null? val) "" val) 10 num-digits)))
 
 (define (display-expression expr)
   (cond ((null? expr) (display '()))
@@ -875,4 +881,12 @@ The variable named modified-counter was created to keep track of the count for t
 current command.
 The increment-modified-counter function was created to allow easy increment.
 The clear-modified-counter function was created to allow easy clear.
+|#
+
+#! 25.9
+#|
+In order to allow each column to track number of decimal places...
+1. Create a vector that contains a spot for each column
+2. Create a command to set this value for a column <- TODO: still need this. 
+3. Modify print-screen to use this information, display-value function is where.
 |#
