@@ -7,6 +7,12 @@
 (define window-cols 6)
 (define window-rows 20)
 
+(define modified-counter 0)
+(define (increment-modified-counter)
+  (set! modified-counter (+ modified-counter 1)))
+(define (clear-modified-counter)
+  (set! modified-counter 0))
+
 (define (spreadsheet)
   (init-array)
   (set-selection-cell-id! (make-id 1 1))
@@ -15,6 +21,7 @@
 
 (define (command-loop)
   (print-screen)
+  (clear-modified-counter)
   (let ((command-or-formula (read)))
     (if (equal? command-or-formula 'exit)
 	"Bye!"
@@ -134,7 +141,8 @@
          (put-all-cells-in-row formula (car where)))
         ((letter? (car where))
          (put-all-cells-in-col formula (letter->number (car where))))
-        (else (error "Put it where?"))))
+        (else (error "Put it where?")))
+  (display-modified-cell-count))
 
 (define (put-all-cells-in-row formula row)
   (put-all-helper formula (lambda (col) (make-id col row)) 1 total-cols))
@@ -154,6 +162,7 @@
       'do-nothing))
 
 (define (put-formula-in-cell formula id)
+  (increment-modified-counter)
   (put-expr (pin-down formula id) id))
 
 ;; Window
@@ -385,6 +394,11 @@
   (display-expression (cell-expr (selection-cell-id)))
   (newline)
   (display "?? "))
+
+(define (display-modified-cell-count)
+  (display modified-counter)
+  (display " cells modified")
+  (newline))
 
 (define (display-cell-name id)
   (display (number->letter (id-column id)))
@@ -842,3 +856,23 @@ More notes in exercise7-notes.md...
 Created the window function
 |#
 ;;(trace ensure-valid-window-id)
+
+#! 25.8
+#|
+In order to accomodate keeping track of the number of modified cells:
+1. Create a variable as a 1 element vector.
+2. Find places where updates can occur and increment the variable at those points.
+       put-formula-in-cell is where this occurs.
+3. Clear the variable at the start of each command
+4. Display the variable at the end of put command
+
+NOTE: I looked at racket's documentation and saw that using a variable is more
+straight forward than creating a vector to store the value, so I decided to use
+a variable instead. You could do it just the same with a 1 element vector in order
+to stay aligned with only functions introduced by Simply Scheme.
+
+The variable named modified-counter was created to keep track of the count for the
+current command.
+The increment-modified-counter function was created to allow easy increment.
+The clear-modified-counter function was created to allow easy clear.
+|#
