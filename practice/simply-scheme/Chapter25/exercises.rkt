@@ -4,6 +4,8 @@
 
 (define total-cols 26)
 (define total-rows 40)
+(define window-cols 6)
+(define window-rows 20)
 
 (define (spreadsheet)
   (init-array)
@@ -86,14 +88,14 @@
     (if (< row (id-row (screen-corner-cell-id)))
         (set-corner-row! row)
         'do-nothing)
-    (if (>= row (+ (id-row (screen-corner-cell-id)) 20))
-        (set-corner-row! (- row 19))
+    (if (>= row (+ (id-row (screen-corner-cell-id)) window-rows))
+        (set-corner-row! (- row (- window-rows 1)))
         'do-nothing)
     (if (< col (id-column (screen-corner-cell-id)))
         (set-corner-column! col)
         'do-nothing)
-    (if (>= col (+ (id-column (screen-corner-cell-id)) 6))
-        (set-corner-column! (- col 5))
+    (if (>= col (+ (id-column (screen-corner-cell-id)) window-cols))
+        (set-corner-column! (- col (- window-cols 1)))
         'do-nothing)))
 
 (define (set-corner-row! new-row)
@@ -166,10 +168,10 @@
     (vector-set! row-and-col 0 (id-row cell-id))
     (vector-set! row-and-col 1 (id-column cell-id))
     
-    (if (> (+ 20 (vector-ref row-and-col 0)) total-rows)
+    (if (> (+ window-rows (vector-ref row-and-col 0)) total-rows)
         (vector-set! row-and-col 0 (- total-rows 19))
         'void)
-    (if (> (+ 6 (vector-ref row-and-col 1)) total-cols)
+    (if (> (+ window-cols (vector-ref row-and-col 1)) total-cols)
         (vector-set! row-and-col 1 (- total-cols 5))
         'void)
     (make-id (vector-ref row-and-col 1) (vector-ref row-and-col 0))))
@@ -357,7 +359,7 @@
   (newline)
   (newline)
   (show-column-labels (id-column (screen-corner-cell-id)))
-  (show-rows 20
+  (show-rows window-rows
 	     (id-column (screen-corner-cell-id))
 	     (id-row (screen-corner-cell-id)))
   (display-cell-name (selection-cell-id))
@@ -373,7 +375,7 @@
 
 (define (show-column-labels col-number)
   (display "  ")
-  (show-label 6 col-number)
+  (show-label window-cols col-number)
   (newline))
 
 (define (show-label to-go this-col-number)
@@ -389,7 +391,7 @@
 	(else
 	 (display (align row 2 0))
 	 (display " ")
-	 (show-row 6 col row)
+	 (show-row window-cols col row)
 	 (newline)
 	 (show-rows (- to-go 1) col (+ row 1)))))
 
