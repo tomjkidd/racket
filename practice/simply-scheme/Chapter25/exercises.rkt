@@ -19,6 +19,14 @@
 (define (number-of-digits-ref col)
   (vector-ref number-of-digits-vector (- col 1)))
 
+;; History
+(define previous-selection-cell-id 'none)
+
+(define (selection-cell-id->history)
+  (if (equal? (selection-cell-id) 0)
+      (set! previous-selection-cell-id (make-id 1 1))
+      (set! previous-selection-cell-id (selection-cell-id))))
+
 (define (spreadsheet)
   (init-array)
   (set-selection-cell-id! (make-id 1 1))
@@ -225,6 +233,10 @@
         (number-of-digits-set! index value)
         (column-width-helper (+ index 1) value))))
 
+;; Undo
+(define (undo)
+  (set-selection-cell-id! previous-selection-cell-id))
+
 ;;; The Association List of Commands
 
 (define (command? name)
@@ -245,7 +257,8 @@
         (list 'put put)
         (list 'load spreadsheet-load)
         (list 'window window)
-        (list 'column-width column-width)))
+        (list 'column-width column-width)
+        (list 'undo undo)))
 
 
 ;;; Pinning Down Formulas Into Expressions
@@ -493,6 +506,7 @@
   (vector-ref *special-cells* 0))
 
 (define (set-selection-cell-id! new-id)
+  (selection-cell-id->history)
   (vector-set! *special-cells* 0 new-id))
 
 (define (screen-corner-cell-id)
@@ -960,3 +974,4 @@ TODO: Remove once each is verified working...
         (list 'window window)
         (list 'column-width column-width)))
 |#
+(spreadsheet)
