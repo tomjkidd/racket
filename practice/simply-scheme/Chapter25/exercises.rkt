@@ -224,7 +224,6 @@
       (begin
         (number-of-digits-set! index value)
         (column-width-helper (+ index 1) value))))
-        
 
 ;;; The Association List of Commands
 
@@ -906,9 +905,58 @@ The clear-modified-counter function was created to allow easy clear.
 #|
 In order to allow each column to track number of decimal places...
 1. Create a vector that contains a spot for each column
-2. Create a command to set this value for a column <- TODO: still need this.
+2. Create a command to set this value for a column
     (column-width [val]) -> set for all columns
     (column-width [col] [val]) -> set for a specific column by index (1-based)
     (column-width [letter] [val]) -> set for a specific column by letter
 3. Modify print-screen to use this information, display-value function is where.
+
+TODO: Create a file of commands to demonstrate functionality works
+(column-width 5) ;; All columns to 5 deciaml places
+(column-width a 3) ;; Column a to 3 decimal places
+(column-width 2 2) ;; Column b to 2 decimal places
+
+(put a1 1.12345)
+(put b1 1.12345)
+(put c1 1.12345)
+
+|#
+
+#! 25.10
+#|
+load and exit don't need to work for undo
+undo of cell select should return to previous cell
+undo of put will re-put the previous expressions in all affected cells
+
+In order to provide undo:
+1. For each command that changes the selected cell, save previous selected cell.
+    Modify set-selection-cell-id! to capture a change
+
+2. For each command that changes one or more cell values, save a list of the
+cell-ids as well as the cells.
+    Modify try-putting to save the cell id and previous cell before writing a new one.
+
+3. For the window command, keep track of the previous corner cell
+    Modify set-screen-corner-cell-id! to capture values
+
+4. For the column-width command, keep track with a snapshot list of the last state
+    Modify number-of-digits-set! to capture values
+
+5. When undo is called, restore each cell based on the list, then restore previous
+selection.
+
+6. Clear history (previous selected cell, previous corner cell, column width list,
+and modified cell list) when a new command is entered (after read).
+
+TODO: Remove once each is verified working...
+(define *the-commands*
+  (list (list 'p prev-row)
+        (list 'n next-row)
+        (list 'b prev-col)
+        (list 'f next-col)
+        (list 'select select)
+        (list 'put put)
+        (list 'load spreadsheet-load)
+        (list 'window window)
+        (list 'column-width column-width)))
 |#
