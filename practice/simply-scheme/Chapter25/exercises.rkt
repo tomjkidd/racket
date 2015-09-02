@@ -208,6 +208,24 @@
     
     (make-id (vector-ref row-and-col 1) (vector-ref row-and-col 0))))
 
+;; Column Width
+(define (column-width . args)
+  (cond ((and (number? (car args)) (null? (cdr args)))
+         (column-width-helper 1 (car args)))
+        ((and (letter? (car args)) (number? (cadr args)))
+         (number-of-digits-set! (letter->number (car args)) (cadr args)))
+        ((and (number? (car args)) (number? (cadr args)))
+         (number-of-digits-set! (car args) (cadr args)))
+        (else (error "Column Width error"))))
+
+(define (column-width-helper index value)
+  (if (> index total-cols)
+      'done
+      (begin
+        (number-of-digits-set! index value)
+        (column-width-helper (+ index 1) value))))
+        
+
 ;;; The Association List of Commands
 
 (define (command? name)
@@ -227,7 +245,8 @@
         (list 'select select)
         (list 'put put)
         (list 'load spreadsheet-load)
-        (list 'window window)))
+        (list 'window window)
+        (list 'column-width column-width)))
 
 
 ;;; Pinning Down Formulas Into Expressions
@@ -887,6 +906,9 @@ The clear-modified-counter function was created to allow easy clear.
 #|
 In order to allow each column to track number of decimal places...
 1. Create a vector that contains a spot for each column
-2. Create a command to set this value for a column <- TODO: still need this. 
+2. Create a command to set this value for a column <- TODO: still need this.
+    (column-width [val]) -> set for all columns
+    (column-width [col] [val]) -> set for a specific column by index (1-based)
+    (column-width [letter] [val]) -> set for a specific column by letter
 3. Modify print-screen to use this information, display-value function is where.
 |#
