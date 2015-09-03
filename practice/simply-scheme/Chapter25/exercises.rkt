@@ -27,6 +27,12 @@
       (set! previous-selection-cell-id (make-id 1 1))
       (set! previous-selection-cell-id (selection-cell-id))))
 
+(define previous-modified-cell-list '())
+
+(define (modified-cell->history id formula)
+  (set! previous-modified-cell-list
+        (cons (list id formula) previous-modified-cell-list)))
+
 (define (spreadsheet)
   (init-array)
   (set-selection-cell-id! (make-id 1 1))
@@ -177,6 +183,7 @@
 
 (define (put-formula-in-cell formula id)
   (increment-modified-counter)
+  (modified-cell->history id (clone-cell id))
   (put-expr (pin-down formula id) id))
 
 ;; Window
@@ -235,7 +242,25 @@
 
 ;; Undo
 (define (undo)
-  (set-selection-cell-id! previous-selection-cell-id))
+  ;; undo selection
+  (set-selection-cell-id! previous-selection-cell-id)
+
+  ;; undo put
+  (let ((modified-cells (list-copy previous-modified-cell-list)))
+    #|
+     Clear out the list now that we have a copy, so that as we iterate through
+     the copy and undo, these new values will be captured and also undo-able.
+    |#
+    (set! previous-modified-cell-list '())
+    (for-each (lambda (history)
+                ;;(display history)
+                (put-formula-in-cell (vector-ref (cadr history) 1) (car history)))
+              modified-cells)))
+
+;; Inspired by http://stackoverflow.com/questions/20802629/copy-of-a-list-or-something-else-in-scheme
+(define (list-copy lst)
+  (if (null? lst) '()
+      (cons (car lst) (list-copy (cdr lst)))))
 
 ;;; The Association List of Commands
 
@@ -587,6 +612,14 @@
 
 (define (cell-structure-from-indices col row)
   (global-array-lookup col row))
+
+(define (clone-cell id)
+  (let ((cell (make-cell)))
+    (vector-set! cell 0 (cell-value id))
+    (vector-set! cell 1 (cell-expr id))
+    (vector-set! cell 2 (cell-parents id))
+    (vector-set! cell 3 (cell-children id))
+    cell))
 
 (define *the-spreadsheet-array* (make-vector total-rows))
 
@@ -948,7 +981,9 @@ In order to provide undo:
 
 2. For each command that changes one or more cell values, save a list of the
 cell-ids as well as the cells.
-    Modify try-putting to save the cell id and previous cell before writing a new one.
+    Modify put-formula-in-cell to save the cell id and previous cell before writing a new one.
+    Create a clone-cell function to clone the values in a cell
+    Create a list-copy function to clone the list of modified cells so that undo will work with undo
 
 3. For the window command, keep track of the previous corner cell
     Modify set-screen-corner-cell-id! to capture values
@@ -963,15 +998,7 @@ selection.
 and modified cell list) when a new command is entered (after read).
 
 TODO: Remove once each is verified working...
-(define *the-commands*
-  (list (list 'p prev-row)
-        (list 'n next-row)
-        (list 'b prev-col)
-        (list 'f next-col)
-        (list 'select select)
-        (list 'put put)
-        (list 'load spreadsheet-load)
-        (list 'window window)
-        (list 'column-width column-width)))
+window
+column-width
 |#
 (spreadsheet)
