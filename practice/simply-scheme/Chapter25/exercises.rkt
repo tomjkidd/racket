@@ -1017,6 +1017,9 @@ selection.
 6. Clear history (previous selected cell, previous corner cell, column width list,
 and modified cell list) when a new command is entered (after read).
 
+TODO: Once all work, keep track of the name of the command that ran last,
+and use that to determine which piece of history to restore. If undo, just keep as is.
+
 TODO: Remove once each is verified working...
 column-width
 |#
