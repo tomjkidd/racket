@@ -1083,4 +1083,67 @@ and use that to determine which piece of history to restore. If undo, just keep 
 (undo)
 
 |#
-(spreadsheet)
+
+#! 25.11
+#|
+Add an accumulate procedure that can be used as a formula
+
+Rectangular mapping
+c2 c7 -> c2 c3 c4 c5 c6 c7
+a3 c5 -> a3 b3 c3 a4 b4 c4 a5 b5 c5
+
+1. Create a function that takes the two cell names and returns a list of cells
+2. Add accumulate to *the-functions*
+3. Reshape the call, where (first args)-> operation and (cdr args) is the list of cells
+4. Modify pin-down to convert accumulate into the spelled-out form
+|#
+(define (col-and-row->cell-name col row)
+  (word (number->letter col)
+        row))
+
+;; TODO: Implement this another way, counting down so the list builds in the right order
+;; Also try to simplify the conditions.
+(define (get-cell-name-range cell-name-a cell-name-b)
+  (let ((current-row (cell-name-row cell-name-a))
+        (current-col (cell-name-column cell-name-a))
+        (end-row (cell-name-row cell-name-b))
+        (end-col (cell-name-column cell-name-b)))
+    (get-cell-name-range-helper '() current-col current-row current-col current-row end-col end-row)))
+
+(define (get-cell-name-range-helper-legacy lst current-col current-row
+                                    start-col start-row
+                                    end-col end-row)
+  (cond ((and (< current-col end-col) (<= current-row end-row))
+         (let ((new-lst (cons (col-and-row->cell-name current-col current-row) lst)))
+           (get-cell-name-range-helper new-lst (+ current-col 1) current-row
+                                     start-col start-row
+                                     end-col end-row)))
+        ((and (= current-col end-col) (<= current-row end-row))
+         (let ((new-lst (cons (col-and-row->cell-name current-col current-row) lst)))
+           (get-cell-name-range-helper new-lst start-col (+ current-row 1)
+                                       start-col start-row
+                                       end-col end-row)))
+        ((and (= current-col start-col) (= current-row (+ end-row 1)))
+         (reverse lst))
+        (else (error "Unexpected get-cell-name-range case"))))
+
+
+;; This is my 'simpler' implementation, constructing each row as a list, then appending the rows together
+;; TODO: Remove current-col and current-row, they aren't needed.
+(define (get-cell-name-range-helper lst current-col current-row
+                                    start-col start-row
+                                    end-col end-row)
+  (let ((col-range (range start-col (+ end-col 1) 1))
+        (row-range (range start-row (+ end-row 1) 1)))
+    (accumulate append (map (lambda (row)
+                (map (lambda (col)
+                            (col-and-row->cell-name col row))
+                          col-range))
+                            row-range))))
+
+(col-and-row->cell-name 1 1)
+
+(get-cell-name-range 'c2 'c7)
+(get-cell-name-range 'a3 'c5)
+
+;;(spreadsheet)
