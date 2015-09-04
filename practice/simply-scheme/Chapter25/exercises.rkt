@@ -364,6 +364,13 @@
         ((null? formula) '())
         ((equal? (car formula) 'cell)
          (pin-down-cell (cdr formula) id))
+        ((equal? (car formula) 'accumulate)
+         (letrec ((fn (cadr formula))
+                  (cell-name-a (caddr formula))
+                  (cell-name-b (cadddr formula))
+                  (expr (cons fn
+                              (get-cell-name-range cell-name-a cell-name-b))))
+           (pin-down expr id)))
         (else (bound-check
                (map (lambda (subformula) (pin-down subformula id))
                     formula)))))
@@ -483,32 +490,33 @@
 
 (define *the-functions*
   (list (list '* *)
-	(list '+ +)
-	(list '- -)
-	(list '/ /)
-	(list 'abs abs)
-	(list 'acos acos)
-	(list 'asin asin)
-	(list 'atan atan)
-	(list 'ceiling ceiling)
-	(list 'cos cos)
-	(list 'count count)
-	(list 'exp exp)
-	(list 'expt expt)
-	(list 'floor floor)
-	(list 'gcd gcd)
-	(list 'lcm lcm)
-	(list 'log log)
-	(list 'max max)
-	(list 'min min)
-	(list 'modulo modulo)
-	(list 'quotient quotient)
-	(list 'remainder remainder)
-	(list 'round round)
-	(list 'sin sin)
-	(list 'sqrt sqrt)
-	(list 'tan tan)
-	(list 'truncate truncate)))
+        (list '+ +)
+        (list '- -)
+        (list '/ /)
+        (list 'abs abs)
+        (list 'acos acos)
+        (list 'asin asin)
+        (list 'atan atan)
+        (list 'ceiling ceiling)
+        (list 'cos cos)
+        (list 'count count)
+        (list 'exp exp)
+        (list 'expt expt)
+        (list 'floor floor)
+        (list 'gcd gcd)
+        (list 'lcm lcm)
+        (list 'log log)
+        (list 'max max)
+        (list 'min min)
+        (list 'modulo modulo)
+        (list 'quotient quotient)
+        (list 'remainder remainder)
+        (list 'round round)
+        (list 'sin sin)
+        (list 'sqrt sqrt)
+        (list 'tan tan)
+        (list 'truncate truncate)
+        (list 'accumulate accumulate)))
 
 ;;; Printing the Screen
 
@@ -1095,7 +1103,15 @@ a3 c5 -> a3 b3 c3 a4 b4 c4 a5 b5 c5
 1. Create a function that takes the two cell names and returns a list of cells
 2. Add accumulate to *the-functions*
 3. Reshape the call, where (first args)-> operation and (cdr args) is the list of cells
-4. Modify pin-down to convert accumulate into the spelled-out form
+4. Modify pin-down to convert accumulate into the spelled-out form (return an expression like (* a3 b3))
+
+(put 1 a)
+(put 1 b)
+(put (accumulate + a1 b2) c1)
+(select c1)
+(put 3 b1)
+(put 3 a2)
+
 |#
 (define (col-and-row->cell-name col row)
   (word (number->letter col)
@@ -1119,9 +1135,14 @@ a3 c5 -> a3 b3 c3 a4 b4 c4 a5 b5 c5
                                    col-range))
                             row-range))))
 
+(define (get-cell-id-range cell-name-a cell-name-b)
+  (map (lambda (cell-name)
+         (cell-name->id cell-name))
+       (get-cell-name-range cell-name-a cell-name-b)))
+
 (col-and-row->cell-name 1 1)
 
 (get-cell-name-range 'c2 'c7)
 (get-cell-name-range 'a3 'c5)
 
-;;(spreadsheet)
+(spreadsheet)
