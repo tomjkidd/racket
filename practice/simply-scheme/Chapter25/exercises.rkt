@@ -7,14 +7,18 @@
 (define window-cols 6)
 (define window-rows 20)
 
+(define default-digits 2)
+
 (define modified-counter 0)
 (define (increment-modified-counter)
   (set! modified-counter (+ modified-counter 1)))
 (define (clear-modified-counter)
   (set! modified-counter 0))
 
-(define number-of-digits-vector (make-vector total-cols 2))
+(define number-of-digits-vector (make-vector total-cols default-digits))
 (define (number-of-digits-set! col value)
+  (modified-column-width->history col
+                                  (vector-ref number-of-digits-vector (- col 1)))
   (vector-set! number-of-digits-vector (- col 1) value))
 (define (number-of-digits-ref col)
   (vector-ref number-of-digits-vector (- col 1)))
@@ -48,6 +52,11 @@
 (define (modified-cell->history id formula)
   (set! previous-modified-cell-list
         (cons (list id formula) previous-modified-cell-list)))
+
+(define previous-column-widths-vector (make-vector total-cols default-digits))
+
+(define (modified-column-width->history col value)
+  (vector-set! previous-column-widths-vector (- col 1) value))
 
 (define (spreadsheet)
   (init-array)
@@ -274,12 +283,43 @@
               modified-cells))
   
   ;; undo window
-  (set-screen-corner-cell-id! (history->corner-cell-id)))
+  (set-screen-corner-cell-id! (history->corner-cell-id))
+
+  ;; undo column-width
+  (let ((modified-widths (vector-copy previous-column-widths-vector)))
+    #|
+     Default out the vector now that we have a copy, so that as we iterate through
+     the copy and undo, these new values will be captured and also undo-able.
+    |#
+    (vector-map! (lambda (prev) default-digits) previous-column-widths-vector)
+    (vector-for-each (lambda (history index)
+                       (number-of-digits-set! (+ index 1) history))
+                     modified-widths)))
 
 ;; Inspired by http://stackoverflow.com/questions/20802629/copy-of-a-list-or-something-else-in-scheme
 (define (list-copy lst)
   (if (null? lst) '()
       (cons (car lst) (list-copy (cdr lst)))))
+
+(define (vector-copy vec)
+  (vector-copy-helper 0 vec (make-vector (vector-length vec))))
+
+(define (vector-copy-helper index old new)
+  (if (= index (vector-length old))
+      new
+      (begin
+        (vector-set! new index (vector-ref old index))
+        (vector-copy-helper (+ index 1) old new))))
+
+(define (vector-for-each fn vec)
+  (vector-for-each-helper 0 vec fn))
+
+(define (vector-for-each-helper index vec fn)
+  (if (< index (vector-length vec))
+      (begin
+        (fn (vector-ref vec index) index)
+        (vector-for-each-helper (+ index 1) vec fn))
+      void))
 
 ;;; The Association List of Commands
 
@@ -1019,9 +1059,6 @@ and modified cell list) when a new command is entered (after read).
 
 TODO: Once all work, keep track of the name of the command that ran last,
 and use that to determine which piece of history to restore. If undo, just keep as is.
-
-TODO: Remove once each is verified working...
-column-width
 |#
 
 (spreadsheet)
