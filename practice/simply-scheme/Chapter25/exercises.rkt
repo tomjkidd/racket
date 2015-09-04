@@ -20,12 +20,28 @@
   (vector-ref number-of-digits-vector (- col 1)))
 
 ;; History
-(define previous-selection-cell-id 'none)
+(define previous-selection-cell-id-index 0)
+(define previous-corner-cell-id-index 1)
+
+(define history-vector (make-vector 2 0))
+
+(define (save-cell-to-history index value)
+  (let ((entry (vector-ref history-vector index)))
+    (if (equal? entry 0)
+      (vector-set! history-vector index (make-id 1 1))
+      (vector-set! history-vector index value))))
 
 (define (selection-cell-id->history)
-  (if (equal? (selection-cell-id) 0)
-      (set! previous-selection-cell-id (make-id 1 1))
-      (set! previous-selection-cell-id (selection-cell-id))))
+  (save-cell-to-history previous-selection-cell-id-index (selection-cell-id)))
+
+(define (history->selection-cell-id)
+  (vector-ref history-vector previous-selection-cell-id-index))
+
+(define (corner-cell-id->history)
+  (save-cell-to-history previous-corner-cell-id-index (screen-corner-cell-id)))
+
+(define (history->corner-cell-id)
+  (vector-ref history-vector previous-corner-cell-id-index))
 
 (define previous-modified-cell-list '())
 
@@ -191,8 +207,8 @@
   (cond ((cell-name? (car where))
          (set-screen-corner-cell-id!
           (let ((cell-id (cell-name->id (car where))))
-            (ensure-valid-window-id (id-column cell-id)
-                                    (id-row cell-id)))))
+            (ensure-valid-window-id (id-row cell-id)
+                                    (id-column cell-id)))))
         ((and (number? (car where))
               (not (null? (cdr where)))
               (number? (cadr where)))
@@ -243,7 +259,7 @@
 ;; Undo
 (define (undo)
   ;; undo selection
-  (set-selection-cell-id! previous-selection-cell-id)
+  (set-selection-cell-id! (history->selection-cell-id))
 
   ;; undo put
   (let ((modified-cells (list-copy previous-modified-cell-list)))
@@ -255,7 +271,10 @@
     (for-each (lambda (history)
                 ;;(display history)
                 (put-formula-in-cell (vector-ref (cadr history) 1) (car history)))
-              modified-cells)))
+              modified-cells))
+  
+  ;; undo window
+  (set-screen-corner-cell-id! (history->corner-cell-id)))
 
 ;; Inspired by http://stackoverflow.com/questions/20802629/copy-of-a-list-or-something-else-in-scheme
 (define (list-copy lst)
@@ -538,6 +557,7 @@
   (vector-ref *special-cells* 1))
 
 (define (set-screen-corner-cell-id! new-id)
+  (corner-cell-id->history)
   (vector-set! *special-cells* 1 new-id))
 
 
@@ -998,7 +1018,7 @@ selection.
 and modified cell list) when a new command is entered (after read).
 
 TODO: Remove once each is verified working...
-window
 column-width
 |#
+
 (spreadsheet)
