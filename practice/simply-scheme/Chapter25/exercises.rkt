@@ -24,6 +24,12 @@
   (vector-ref number-of-digits-vector (- col 1)))
 
 ;; History
+(define previous-command-name 'none)
+(define (previous-command-name->history name)
+  (set! previous-command-name name))
+(define (history->previous-command-name)
+  previous-command-name)
+
 (define previous-selection-cell-id-index 0)
 (define previous-corner-cell-id-index 1)
 
@@ -84,7 +90,10 @@
 
 (define (execute-command command)
   (apply (get-command (car command))
-	 (cdr command)))
+	 (cdr command))
+  (if (not (equal? (car command) 'undo))
+      (previous-command-name->history (car command))
+      void))
 
 (define (exhibit val)
   (show val)
@@ -253,10 +262,18 @@
   (cond ((and (number? (car args)) (null? (cdr args)))
          (column-width-helper 1 (car args)))
         ((and (letter? (car args)) (number? (cadr args)))
+         (update-column-width-history)
          (number-of-digits-set! (letter->number (car args)) (cadr args)))
         ((and (number? (car args)) (number? (cadr args)))
+         (update-column-width-history)
          (number-of-digits-set! (car args) (cadr args)))
         (else (error "Column Width error"))))
+
+;; Write to all cells with existing values (to capture for history)
+(define (update-column-width-history)
+  (vector-for-each (lambda (history index)
+                     (number-of-digits-set! (+ index 1) history))
+                   number-of-digits-vector))
 
 (define (column-width-helper index value)
   (if (> index total-cols)
@@ -267,34 +284,28 @@
 
 ;; Undo
 (define (undo)
-  ;; undo selection
-  (set-selection-cell-id! (history->selection-cell-id))
-
-  ;; undo put
-  (let ((modified-cells (list-copy previous-modified-cell-list)))
-    #|
-     Clear out the list now that we have a copy, so that as we iterate through
-     the copy and undo, these new values will be captured and also undo-able.
-    |#
-    (set! previous-modified-cell-list '())
-    (for-each (lambda (history)
-                ;;(display history)
-                (put-formula-in-cell (vector-ref (cadr history) 1) (car history)))
-              modified-cells))
-  
-  ;; undo window
-  (set-screen-corner-cell-id! (history->corner-cell-id))
-
-  ;; undo column-width
-  (let ((modified-widths (vector-copy previous-column-widths-vector)))
-    #|
-     Default out the vector now that we have a copy, so that as we iterate through
-     the copy and undo, these new values will be captured and also undo-able.
-    |#
-    (vector-map! (lambda (prev) default-digits) previous-column-widths-vector)
-    (vector-for-each (lambda (history index)
-                       (number-of-digits-set! (+ index 1) history))
-                     modified-widths)))
+  (let ((prev (history->previous-command-name)))
+    (cond ((member? prev '(n p b f select))
+           (set-selection-cell-id! (history->selection-cell-id)))
+          ((equal? 'put prev)
+           (let ((modified-cells (list-copy previous-modified-cell-list)))
+             #|
+             Clear out the list now that we have a copy, so that as we iterate through
+             the copy and undo, these new values will be captured and also undo-able.
+             |#
+             (set! previous-modified-cell-list '())
+             (for-each (lambda (history)
+                         ;;(display history)
+                         (put-formula-in-cell (vector-ref (cadr history) 1) (car history)))
+                       modified-cells)))
+          ((equal? 'window prev)
+           (set-screen-corner-cell-id! (history->corner-cell-id)))
+          ((equal? 'column-width prev)
+           (let ((modified-widths (vector-copy previous-column-widths-vector)))
+             (vector-for-each (lambda (history index)
+                                (number-of-digits-set! (+ index 1) history))
+                              modified-widths)))
+          (else 'do-nothing))))
 
 ;; Inspired by http://stackoverflow.com/questions/20802629/copy-of-a-list-or-something-else-in-scheme
 (define (list-copy lst)
@@ -514,6 +525,7 @@
   (show (cell-value (selection-cell-id)))
   (display-expression (cell-expr (selection-cell-id)))
   (newline)
+  ;;(display previous-column-widths-vector)
   (display "?? "))
 
 (define (display-modified-cell-count)
@@ -1057,8 +1069,18 @@ selection.
 6. Clear history (previous selected cell, previous corner cell, column width list,
 and modified cell list) when a new command is entered (after read).
 
+7. Keep track of execute-command to tell which command ran last
+
 TODO: Once all work, keep track of the name of the command that ran last,
 and use that to determine which piece of history to restore. If undo, just keep as is.
-|#
 
+(put 0.123456 1)
+(column-width 5)
+(column-width b 3)
+(undo)
+(column-width b 4)
+(column-width 2)
+(undo)
+
+|#
 (spreadsheet)
