@@ -1101,44 +1101,22 @@ a3 c5 -> a3 b3 c3 a4 b4 c4 a5 b5 c5
   (word (number->letter col)
         row))
 
-;; TODO: Implement this another way, counting down so the list builds in the right order
-;; Also try to simplify the conditions.
 (define (get-cell-name-range cell-name-a cell-name-b)
   (let ((current-row (cell-name-row cell-name-a))
         (current-col (cell-name-column cell-name-a))
         (end-row (cell-name-row cell-name-b))
         (end-col (cell-name-column cell-name-b)))
-    (get-cell-name-range-helper '() current-col current-row current-col current-row end-col end-row)))
+    (get-cell-name-range-helper current-col current-row end-col end-row)))
 
-(define (get-cell-name-range-helper-legacy lst current-col current-row
-                                    start-col start-row
+(define (get-cell-name-range-helper start-col start-row
                                     end-col end-row)
-  (cond ((and (< current-col end-col) (<= current-row end-row))
-         (let ((new-lst (cons (col-and-row->cell-name current-col current-row) lst)))
-           (get-cell-name-range-helper new-lst (+ current-col 1) current-row
-                                     start-col start-row
-                                     end-col end-row)))
-        ((and (= current-col end-col) (<= current-row end-row))
-         (let ((new-lst (cons (col-and-row->cell-name current-col current-row) lst)))
-           (get-cell-name-range-helper new-lst start-col (+ current-row 1)
-                                       start-col start-row
-                                       end-col end-row)))
-        ((and (= current-col start-col) (= current-row (+ end-row 1)))
-         (reverse lst))
-        (else (error "Unexpected get-cell-name-range case"))))
-
-
-;; This is my 'simpler' implementation, constructing each row as a list, then appending the rows together
-;; TODO: Remove current-col and current-row, they aren't needed.
-(define (get-cell-name-range-helper lst current-col current-row
-                                    start-col start-row
-                                    end-col end-row)
+  ;; NOTE: Add 1 to end-col and end-row so that range will include them.
   (let ((col-range (range start-col (+ end-col 1) 1))
         (row-range (range start-row (+ end-row 1) 1)))
     (accumulate append (map (lambda (row)
-                (map (lambda (col)
-                            (col-and-row->cell-name col row))
-                          col-range))
+                              (map (lambda (col)
+                                     (col-and-row->cell-name col row))
+                                   col-range))
                             row-range))))
 
 (col-and-row->cell-name 1 1)
