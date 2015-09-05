@@ -17,7 +17,7 @@
 
 (define number-of-digits-vector (make-vector total-cols default-digits))
 (define (number-of-digits-set! col value)
-  (modified-column-width->history col
+  (modified-column-digits-after-decimal->history col
                                   (vector-ref number-of-digits-vector (- col 1)))
   (vector-set! number-of-digits-vector (- col 1) value))
 (define (number-of-digits-ref col)
@@ -59,10 +59,10 @@
   (set! previous-modified-cell-list
         (cons (list id formula) previous-modified-cell-list)))
 
-(define previous-column-widths-vector (make-vector total-cols default-digits))
+(define previous-column-digits-after-decimals-vector (make-vector total-cols default-digits))
 
-(define (modified-column-width->history col value)
-  (vector-set! previous-column-widths-vector (- col 1) value))
+(define (modified-column-digits-after-decimal->history col value)
+  (vector-set! previous-column-digits-after-decimals-vector (- col 1) value))
 
 (define (spreadsheet)
   (init-array)
@@ -258,29 +258,29 @@
     (make-id (vector-ref row-and-col 1) (vector-ref row-and-col 0))))
 
 ;; Column Width
-(define (column-width . args)
+(define (column-digits-after-decimal . args)
   (cond ((and (number? (car args)) (null? (cdr args)))
-         (column-width-helper 1 (car args)))
+         (column-digits-after-decimal-helper 1 (car args)))
         ((and (letter? (car args)) (number? (cadr args)))
-         (update-column-width-history)
+         (update-column-digits-after-decimal-history)
          (number-of-digits-set! (letter->number (car args)) (cadr args)))
         ((and (number? (car args)) (number? (cadr args)))
-         (update-column-width-history)
+         (update-column-digits-after-decimal-history)
          (number-of-digits-set! (car args) (cadr args)))
         (else (error "Column Width error"))))
 
 ;; Write to all cells with existing values (to capture for history)
-(define (update-column-width-history)
+(define (update-column-digits-after-decimal-history)
   (vector-for-each (lambda (history index)
                      (number-of-digits-set! (+ index 1) history))
                    number-of-digits-vector))
 
-(define (column-width-helper index value)
+(define (column-digits-after-decimal-helper index value)
   (if (> index total-cols)
       'done
       (begin
         (number-of-digits-set! index value)
-        (column-width-helper (+ index 1) value))))
+        (column-digits-after-decimal-helper (+ index 1) value))))
 
 ;; Undo
 (define (undo)
@@ -300,8 +300,8 @@
                        modified-cells)))
           ((equal? 'window prev)
            (set-screen-corner-cell-id! (history->corner-cell-id)))
-          ((equal? 'column-width prev)
-           (let ((modified-widths (vector-copy previous-column-widths-vector)))
+          ((equal? 'column-digits-after-decimal prev)
+           (let ((modified-widths (vector-copy previous-column-digits-after-decimals-vector)))
              (vector-for-each (lambda (history index)
                                 (number-of-digits-set! (+ index 1) history))
                               modified-widths)))
@@ -352,7 +352,7 @@
         (list 'put put)
         (list 'load spreadsheet-load)
         (list 'window window)
-        (list 'column-width column-width)
+        (list 'column-digits-after-decimal column-digits-after-decimal)
         (list 'undo undo)))
 
 
@@ -533,7 +533,7 @@
   (show (cell-value (selection-cell-id)))
   (display-expression (cell-expr (selection-cell-id)))
   (newline)
-  ;;(display previous-column-widths-vector)
+  ;;(display previous-column-digits-after-decimals-vector)
   (display "?? "))
 
 (define (display-modified-cell-count)
@@ -1033,15 +1033,15 @@ The clear-modified-counter function was created to allow easy clear.
 In order to allow each column to track number of decimal places...
 1. Create a vector that contains a spot for each column
 2. Create a command to set this value for a column
-    (column-width [val]) -> set for all columns
-    (column-width [col] [val]) -> set for a specific column by index (1-based)
-    (column-width [letter] [val]) -> set for a specific column by letter
+    (column-digits-after-decimal [val]) -> set for all columns
+    (column-digits-after-decimal [col] [val]) -> set for a specific column by index (1-based)
+    (column-digits-after-decimal [letter] [val]) -> set for a specific column by letter
 3. Modify print-screen to use this information, display-value function is where.
 
 TODO: Create a file of commands to demonstrate functionality works
-(column-width 5) ;; All columns to 5 deciaml places
-(column-width a 3) ;; Column a to 3 decimal places
-(column-width 2 2) ;; Column b to 2 decimal places
+(column-digits-after-decimal 5) ;; All columns to 5 deciaml places
+(column-digits-after-decimal a 3) ;; Column a to 3 decimal places
+(column-digits-after-decimal 2 2) ;; Column b to 2 decimal places
 
 (put a1 1.12345)
 (put b1 1.12345)
@@ -1068,7 +1068,7 @@ cell-ids as well as the cells.
 3. For the window command, keep track of the previous corner cell
     Modify set-screen-corner-cell-id! to capture values
 
-4. For the column-width command, keep track with a snapshot list of the last state
+4. For the column-digits-after-decimal command, keep track with a snapshot list of the last state
     Modify number-of-digits-set! to capture values
 
 5. When undo is called, restore each cell based on the list, then restore previous
@@ -1083,11 +1083,11 @@ TODO: Once all work, keep track of the name of the command that ran last,
 and use that to determine which piece of history to restore. If undo, just keep as is.
 
 (put 0.123456 1)
-(column-width 5)
-(column-width b 3)
+(column-digits-after-decimal 5)
+(column-digits-after-decimal b 3)
 (undo)
-(column-width b 4)
-(column-width 2)
+(column-digits-after-decimal b 4)
+(column-digits-after-decimal 2)
 (undo)
 
 |#
@@ -1144,5 +1144,12 @@ a3 c5 -> a3 b3 c3 a4 b4 c4 a5 b5 c5
 
 (get-cell-name-range 'c2 'c7)
 (get-cell-name-range 'a3 'c5)
+
+#! 25.12
+#|
+Add variable width columns to the spreadsheet.
+There should be a command to print width of a column.
+This may mean that the spreadsheet can display more of fewer than six columns
+|#
 
 (spreadsheet)
