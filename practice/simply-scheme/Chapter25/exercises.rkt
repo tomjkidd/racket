@@ -9,6 +9,27 @@
 
 (define default-digits 2)
 
+(define default-column-width 12)
+(define screen-width (* 6 default-column-width))
+
+(define (calculate-window-cols)
+  ;; TODO use (screen-corner-cell-id) to find the starting point
+  ;; Start with screen-width and an index
+  ;; Iterate through cells, find out the column width, see if column fits with
+  ;; remaining space.
+  void)
+
+;; TODO: Implement based on this psuedo-code
+#|
+(define (calculate-window-cols-helper remaining-width col-index num-cols)
+  (if (has-more-columns? column-width-vector col-index)
+      (if (< (- remaining-width (column-width col-index)) 0)
+          num-cols
+          (calculate-window-cols-helper (- remaining-width (column-width col-index))
+                                        (+ col-index 1) (+ num-cols)))
+      num-cols))
+|#
+
 (define modified-counter 0)
 (define (increment-modified-counter)
   (set! modified-counter (+ modified-counter 1)))
@@ -257,7 +278,7 @@
     
     (make-id (vector-ref row-and-col 1) (vector-ref row-and-col 0))))
 
-;; Column Width
+;; Column digits after decimal
 (define (column-digits-after-decimal . args)
   (cond ((and (number? (car args)) (null? (cdr args)))
          (column-digits-after-decimal-helper 1 (car args)))
@@ -1148,8 +1169,24 @@ a3 c5 -> a3 b3 c3 a4 b4 c4 a5 b5 c5
 #! 25.12
 #|
 Add variable width columns to the spreadsheet.
-There should be a command to print width of a column.
+There should be a command to set the print width of a column.
 This may mean that the spreadsheet can display more of fewer than six columns
+
+Interface
+---------
+
+(column-width [letter] [width]) -> set a single column's width by column letter
+(column-width [col] [width]) -> set a single column's width by index (1-indexed!)
+(column-width [width]) -> set all columns' width
+
+Plan
+----
+1. Establish a screen width
+2. Create a way to determine the columns that fit, based on the window
+   Update window-cols based on this.
+3. Ensure that the print functions respect printing only columns that fit
+4. Ensure that adjusting the width of columns results in relevant update to window
+
 |#
 
 (spreadsheet)
