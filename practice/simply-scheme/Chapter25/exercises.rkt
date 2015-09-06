@@ -13,22 +13,18 @@
 (define screen-width (* 6 default-column-width))
 
 (define (calculate-window-cols)
-  ;; TODO use (screen-corner-cell-id) to find the starting point
-  ;; Start with screen-width and an index
-  ;; Iterate through cells, find out the column width, see if column fits with
-  ;; remaining space.
-  void)
+  (calculate-window-cols-helper screen-width (id-column (screen-corner-cell-id)) 1))
 
-;; TODO: Implement based on this psuedo-code
-#|
 (define (calculate-window-cols-helper remaining-width col-index num-cols)
   (if (has-more-columns? column-width-vector col-index)
-      (if (< (- remaining-width (column-width col-index)) 0)
+      (if (< (- remaining-width (column-width-vector-ref col-index)) 0)
           num-cols
-          (calculate-window-cols-helper (- remaining-width (column-width col-index))
-                                        (+ col-index 1) (+ num-cols)))
+          (calculate-window-cols-helper (- remaining-width (column-width-vector-ref col-index))
+                                        (+ col-index 1) (+ num-cols 1)))
       num-cols))
-|#
+
+(define (has-more-columns? vec index)
+  (< index (vector-length vec)))
 
 (define modified-counter 0)
 (define (increment-modified-counter)
@@ -1197,11 +1193,22 @@ Plan
    Update window-cols based on this.
 3. Ensure that the print functions respect printing only columns that fit
 4. Ensure that adjusting the width of columns results in relevant update to window
-
+5. Update display-column-labels procedure to respect the column width
 |#
 
 (column-width-vector-ref 1)
 (column-width-vector-set! 1 15)
 (column-width-vector-ref 1)
 
+(has-more-columns? column-width-vector 25)
+(has-more-columns? column-width-vector 26)
+
+(trace calculate-window-cols-helper)
+
+(calculate-window-cols-helper screen-width 1 1)
+(screen-corner-cell-id)
+
+(set-selection-cell-id! (make-id 1 1))
+(set-screen-corner-cell-id! (make-id 1 1))
+(calculate-window-cols)
 ;;(spreadsheet)
