@@ -44,6 +44,17 @@
 (define (number-of-digits-ref col)
   (vector-ref number-of-digits-vector (- col 1)))
 
+;; Column width
+(define column-width-vector (make-vector total-cols default-column-width))
+
+(define (column-width-vector-set! col value)
+  ;;(modified-column-width->history col
+                                  ;;(vector-ref number-of-digits-vector (- col 1)))
+  (vector-set! column-width-vector (- col 1) value))
+
+(define (column-width-vector-ref col)
+  (vector-ref column-width-vector (- col 1)))
+
 ;; History
 (define previous-command-name 'none)
 (define (previous-command-name->history name)
@@ -1189,4 +1200,8 @@ Plan
 
 |#
 
-(spreadsheet)
+(column-width-vector-ref 1)
+(column-width-vector-set! 1 15)
+(column-width-vector-ref 1)
+
+;;(spreadsheet)
