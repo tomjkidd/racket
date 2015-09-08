@@ -604,12 +604,24 @@
 
 (define (show-label to-go this-col-number)
   (cond ((= to-go 0) '())
-	(else
-	 (display "  -----")
-	 (display (number->letter this-col-number))
-	 (display "----")
-	 (show-label (- to-go 1) (+ 1 this-col-number)))))
+        (else
+         (let ((col-width (column-width-vector-ref this-col-number)))
+           (display "  ")
+           (display (string-repeat "-" (/ (- col-width 2) 2)))
+           ;;(display "-----")
+           (display (number->letter this-col-number))
+           (display (string-repeat "-" (- (/ (- col-width 2) 2) 1)))
+           ;;(display "----")
+           (show-label (- to-go 1) (+ 1 this-col-number))))))
 
+(define (string-repeat string number-of-times)
+  (string-repeat-helper string number-of-times ""))
+
+(define (string-repeat-helper string number-of-times new)
+  (if (< number-of-times 1)
+      new
+      (string-repeat-helper string (- number-of-times 1) (string-append new string))))
+  
 (define (show-rows to-go col row)
   (cond ((= to-go 0) 'done)
 	(else
