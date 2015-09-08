@@ -13,7 +13,7 @@
 (define screen-width (* 6 default-column-width))
 
 (define (calculate-window-cols)
-  (calculate-window-cols-helper screen-width (id-column (screen-corner-cell-id)) 1))
+  (calculate-window-cols-helper screen-width (id-column (screen-corner-cell-id)) 0))
 
 (define (calculate-window-cols-helper remaining-width col-index num-cols)
   (if (has-more-columns? column-width-vector col-index)
@@ -40,7 +40,6 @@
 (define (number-of-digits-ref col)
   (vector-ref number-of-digits-vector (- col 1)))
 
-;; Column width
 (define column-width-vector (make-vector total-cols default-column-width))
 
 (define (column-width-vector-set! col value)
@@ -295,7 +294,7 @@
         ((and (number? (car args)) (number? (cadr args)))
          (update-column-digits-after-decimal-history)
          (number-of-digits-set! (car args) (cadr args)))
-        (else (error "Column Width error"))))
+        (else (error "Column digits after decimal error"))))
 
 ;; Write to all cells with existing values (to capture for history)
 (define (update-column-digits-after-decimal-history)
@@ -360,6 +359,30 @@
         (vector-for-each-helper (+ index 1) vec fn))
       void))
 
+;; Column width
+(define (column-width . args)
+  (cond ((and (number? (car args)) (null? (cdr args)))
+         (column-width-helper 1 (car args)))
+        ((and (letter? (car args)) (number? (cadr args)))
+         ;;(update-column-width-history)
+         (column-width-vector-set! (letter->number (car args)) (cadr args)))
+        ((and (number? (car args)) (number? (cadr args)))
+         ;;(update-update-column-width-history-history)
+         (column-width-vector-set! (car args) (cadr args)))
+        (else (error "Column Width error")))
+  (set! window-cols (calculate-window-cols)))
+
+(define (column-width-helper index value)
+  (if (> index total-cols)
+      'done
+      (begin
+        (column-width-vector-set! index value)
+        (column-width-helper (+ index 1) value))))
+;; TODO: Update to handle undo history.
+;; TODO: Capture common code and refactor so that Column Digits and Width reuse
+;; as much as possible.
+
+
 ;;; The Association List of Commands
 
 (define (command? name)
@@ -381,7 +404,8 @@
         (list 'load spreadsheet-load)
         (list 'window window)
         (list 'column-digits-after-decimal column-digits-after-decimal)
-        (list 'undo undo)))
+        (list 'undo undo)
+        (list 'column-width column-width)))
 
 
 ;;; Pinning Down Formulas Into Expressions
@@ -1188,12 +1212,12 @@ Interface
 
 Plan
 ----
-1. Establish a screen width
+1. Establish a screen width variable.
 2. Create a way to determine the columns that fit, based on the window
    Update window-cols based on this.
 3. Ensure that the print functions respect printing only columns that fit
-4. Ensure that adjusting the width of columns results in relevant update to window
-5. Update display-column-labels procedure to respect the column width
+4. TODO: Ensure that adjusting the width of columns results in relevant update to window
+5. TODO: Update display-column-labels procedure to respect the column width
 |#
 
 (column-width-vector-ref 1)
@@ -1211,4 +1235,10 @@ Plan
 (set-selection-cell-id! (make-id 1 1))
 (set-screen-corner-cell-id! (make-id 1 1))
 (calculate-window-cols)
-;;(spreadsheet)
+
+#|
+(column-width a 61) ;; -> 1 column shows
+(column-width a 60) ;; -> 2 columns show
+(column-width a 48) ;; -> 3 columns show
+|#
+(spreadsheet)
