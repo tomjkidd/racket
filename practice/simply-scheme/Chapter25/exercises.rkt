@@ -635,7 +635,7 @@
   (cond ((= to-go 0) 'done)
 	(else
 	   (display (if (selected-indices? col row) ">" " "))
-	   (display-value (cell-value-from-indices col row) (number-of-digits-ref col))
+	   (display-value (cell-value-from-indices col row) (column-width-vector-ref col) (number-of-digits-ref col))
 	   (display (if (selected-indices? col row) "<" " "))
 	   (show-row (- to-go 1) (+ 1 col) row))))
 
@@ -643,8 +643,8 @@
   (and (= col (id-column (selection-cell-id)))
        (= row (id-row (selection-cell-id)))))
 
-(define (display-value val num-digits)
-  (display (align (if (null? val) "" val) 10 num-digits)))
+(define (display-value val column-width num-digits)
+  (display (align (if (null? val) "" val) (- column-width 2) num-digits)))
 
 (define (display-expression expr)
   (cond ((null? expr) (display '()))
@@ -1228,10 +1228,13 @@ Plan
 2. Create a way to determine the columns that fit, based on the window
    Update window-cols based on this.
 3. Ensure that the print functions respect printing only columns that fit
-4. TODO: Ensure that adjusting the width of columns results in relevant update to window
-5. TODO: Update display-column-labels procedure to respect the column width
+4. Ensure that adjusting the width of columns results in relevant update to window
+5. Update display-column-labels procedure to respect the column width
+6. TODO: Using the commands (column-width 24) and (window z1) does not show the z
+   column. Factor column-width into window function.
 |#
 
+#|
 (column-width-vector-ref 1)
 (column-width-vector-set! 1 15)
 (column-width-vector-ref 1)
@@ -1247,6 +1250,7 @@ Plan
 (set-selection-cell-id! (make-id 1 1))
 (set-screen-corner-cell-id! (make-id 1 1))
 (calculate-window-cols)
+|#
 
 #|
 (column-width a 61) ;; -> 1 column shows
