@@ -276,13 +276,42 @@
         'void)
     
     (if (> (+ window-cols (vector-ref row-and-col 1)) total-cols)
-        (vector-set! row-and-col 1 (- total-cols 5))
+        
+        (vector-set! row-and-col 1 (get-column-overflow-column
+                                    screen-width
+                                    (vector-ref row-and-col 1)))
         'void)
     (if (< (vector-ref row-and-col 1) 1)
         (vector-set! row-and-col 1 1)
         'void)
     
     (make-id (vector-ref row-and-col 1) (vector-ref row-and-col 0))))
+
+(define (get-column-overflow-column remaining-width new-col)
+  (column-overflow-helper screen-width new-col new-col))
+
+(define (column-overflow-helper remaining-width
+                                target-column current-column)
+  ;; Start at the new column, go out as much as possible
+  ;; If there is still remaining width, go in as much as possible from target column
+  (let ((max-column total-cols))
+    (if (> current-column max-column)
+        (backtrack-for-window remaining-width target-column (- target-column 1))
+        (let ((new-remaining-width (- remaining-width
+                                      (column-width-vector-ref current-column))))
+          (if (> new-remaining-width 0)
+              (column-overflow-helper new-remaining-width
+                                      target-column (+ current-column 1))
+              current-column)))))
+
+(define (backtrack-for-window remaining-width target-column current-column)
+  (if (< current-column 1)
+      1
+      (let ((new-remaining-width (- remaining-width
+                                      (column-width-vector-ref current-column))))
+        (if (> new-remaining-width 0)
+            (backtrack-for-window new-remaining-width target-column (- current-column 1))
+            current-column))))
 
 ;; Column digits after decimal
 (define (column-digits-after-decimal . args)
@@ -1143,7 +1172,7 @@ and modified cell list) when a new command is entered (after read).
 
 7. Keep track of execute-command to tell which command ran last
 
-TODO: Once all work, keep track of the name of the command that ran last,
+Once all work, keep track of the name of the command that ran last,
 and use that to determine which piece of history to restore. If undo, just keep as is.
 
 (put 0.123456 1)
@@ -1230,8 +1259,13 @@ Plan
 3. Ensure that the print functions respect printing only columns that fit
 4. Ensure that adjusting the width of columns results in relevant update to window
 5. Update display-column-labels procedure to respect the column width
-6. TODO: Using the commands (column-width 24) and (window z1) does not show the z
+6. Using the commands (column-width 24) and (window z1) does not show the z
    column. Factor column-width into window function.
+   NOTE: The column-overflow-column is the column for the cell that should
+     be used for the window. When the user chooses a cell that doesn't use the whole
+     screen with the rest of the cells to it's right, this will calculate the window
+     to use such that the whole screen is used including as many cells to the left
+     as possible.
 |#
 
 #|
@@ -1257,4 +1291,13 @@ Plan
 (column-width a 60) ;; -> 2 columns show
 (column-width a 48) ;; -> 3 columns show
 |#
+
+#|
+(trace column-overflow-helper)
+(trace backtrack-for-window)
+(get-column-overflow-column screen-width 1)
+(get-column-overflow-column screen-width 25)
+(get-column-overflow-column screen-width 21)
+|#
+
 (spreadsheet)
