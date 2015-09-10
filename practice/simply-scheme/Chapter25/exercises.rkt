@@ -308,7 +308,7 @@
   (if (< current-column 1)
       1
       (let ((new-remaining-width (- remaining-width
-                                      (column-width-vector-ref current-column))))
+                                    (column-width-vector-ref current-column))))
         (if (> new-remaining-width 0)
             (backtrack-for-window new-remaining-width target-column (- current-column 1))
             current-column))))
