@@ -6,9 +6,18 @@ Terms
 
 (macro: An extension to Scheme that allows programs to define and use new derived expression types.)
 
+(relation: A function that returns a goal as its value)
+
 Notes
 =====
 * Need to understand Scheme macros at level of let, and, and cond
+* Two constants, {#s, #u}
+* Three operators, {unify, fresh, conde}
+* #s and #u resemble #t and #f
+* fresh resembles lambda
+* conde is syntactically like cond
+* relations are named, ending in 'o'
+* run is the interface to scheme
 
 
 Not part of book
