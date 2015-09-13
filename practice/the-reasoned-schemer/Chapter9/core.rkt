@@ -66,6 +66,21 @@ is equivalent to
            (else v))))
       (else v))))
 
+(define unify
+  (lambda (v w s)
+    (let ((v (walk v s))
+          (w (walk w s)))
+      (cond
+        ((eq? v w) s)
+        ((var? v) (ext-s v w s))
+        ((var? w) (ext-s w v s))
+        ((and (pair? v) (pair? w))
+         (let ((a (unify (car v) (car w) s)))
+           (cond
+             (a ((lambda (s) (unify (cdr v) (cdr w) s)) a))
+             (else #f))))
+        (else #f)))))
+
 (walk z (list (cons z 'a) (cons x w) (cons y z)))
 
 (walk y (list (cons z 'a) (cons x w) (cons y z)))
@@ -81,3 +96,5 @@ is equivalent to
 (walk x (ext-s z 'b (list (cons y z) (cons x y))))
 
 (walk x (ext-s z w (list (cons y z) (cons x y))))
+
+(unify x y (list (cons x 'a) (cons z 'b)))
