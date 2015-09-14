@@ -81,6 +81,17 @@ is equivalent to
              (else #f))))
         (else #f)))))
 
+(define walk*
+  (lambda (v s)
+    (let ((v (walk v s)))
+      (cond
+        ((var? v) v)
+        ((pair? v)
+         (cons
+          (walk* (car v) s)
+          (walk* (cdr v) s)))
+        (else v)))))
+
 (walk z (list (cons z 'a) (cons x w) (cons y z)))
 
 (walk y (list (cons z 'a) (cons x w) (cons y z)))
@@ -98,3 +109,16 @@ is equivalent to
 (walk x (ext-s z w (list (cons y z) (cons x y))))
 
 (unify x y (list (cons x 'a) (cons z 'b)))
+
+(walk* x (list (cons y (list 'a z 'c))
+               (cons x y)
+               (cons z 'a)))
+
+(walk* x (list (cons y (list z w 'c))
+               (cons x y)
+               (cons z 'a)))
+
+(walk* y (list (cons y (list w z 'c))
+               (cons v 'b)
+               (cons x v)
+               (cons z x)))
