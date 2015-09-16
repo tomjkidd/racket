@@ -79,3 +79,47 @@
           ((equal? (first answer) 'n) #f)
           (else (show "Please type Y or N.")
                 (ask question)))))
+
+(define (count-db)
+  (length (db-records (current-db))))
+
+(define (for-each-with-index fn lst)
+  (for-each-with-index-helper lst fn 0))
+
+(define (for-each-with-index-helper lst fn index)
+  (if (null? lst)
+      void
+      (begin
+        (fn (car lst) index)
+        (for-each-with-index-helper (cdr lst) fn (+ index 1)))))
+
+(define (display-field field-name field-value)
+  (display field-name)
+  (display ": ")
+  (display field-value))
+
+(define (display-record record fields record-index)
+  (display "Record ")
+  (display record-index)
+  (newline)
+  (for-each-with-index (lambda (field index)
+                         (display-field field (vector-ref record index))
+                         (newline))
+                       fields)
+  (newline))
+
+(define (display-record-helper records fields record-index)
+  (if (null? records)
+      (display "listed")
+      (begin
+        (display-record (car records) fields record-index)
+        (display-record-helper (cdr records) fields (+ record-index 1)))))
+              
+(define (list-db)
+  (display-record-helper (db-records (current-db)) (db-fields (current-db)) 1))
+              
+
+(define db (make-db "test" '("Column A" "Column B") '( #(1 2) #(3 4))))
+(set-current-db! db)
+(count-db)
+(list-db)
