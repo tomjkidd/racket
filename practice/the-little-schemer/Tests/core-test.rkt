@@ -2,6 +2,7 @@
 
 (require rackunit
          rackunit/text-ui
+         rackunit/gui
          "../core.rkt")
 
 (define atom?-tests
@@ -48,5 +49,5 @@
    member?-tests))
 
 (run-tests all-core-tests)
-    
+;;(run-tests all-core-tests)
     
