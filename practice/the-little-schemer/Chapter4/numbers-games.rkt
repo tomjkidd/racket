@@ -75,3 +75,26 @@ line.
 (oexpt 2 3)
 (oexpt 5 3)
 (o/ 15 4)
+
+(length '(hotdogs with mustard sauerkraut and pickles))
+(length '(ham and cheese on rye))
+(pick 4 '(lasagna spaghetti raioli macaroni meatball))
+;; (pick 0 '(a)) ;; No answer
+(rempick 3 '(hotdogs with hot mustard))
+
+(number? 'a)
+(number? 76)
+(no-nums '(5 pears 6 prunes 9 dates))
+
+(all-nums '(5 pears 6 prunes 9 dates))
+
+(eqan? 5 6)
+(eqan? 6 6)
+(eqan? 'a 'b)
+(eqan? 'a 'a)
+(occur 'a '(b c d))
+(occur 'a '(a b c d a))
+(occur 1 '(2 3 4))
+(occur 1 '(1 2 3 1 2 1))
+(one? 1)
+(one? 0)

@@ -33,7 +33,20 @@
          o/
          tup?
          addtup
-         tup+)
+         tup+
+
+         length
+
+         pick
+         rempick
+
+         no-nums
+         all-nums
+
+         eqan?
+         occur
+
+         one?)
 
 ;; An atom is not a pair and not null (the empty list)
 (define atom?
@@ -245,3 +258,50 @@ Possibilities
   (lambda (n m)
     (cond ((o< n m) 0)
           (else (add1 (o/ (o- n m) m))))))
+
+(define length
+  (lambda (lst)
+    (cond ((null? lst) 0)
+          (else (add1 (length (cdr lst)))))))
+
+(define pick
+  (lambda (n lst)
+    (cond ((null? lst) (error "pick ran out of items"))
+          ((zero? (sub1 n)) (car lst))
+          (else (pick (sub1 n) (cdr lst))))))
+
+(define rempick
+  (lambda (n lst)
+    (cond ((null? lst) (error "rempick ran out of items"))
+          ((one? n) (cdr lst))
+          (else (cons (car lst) (rempick (sub1 n) (cdr lst)))))))
+
+(define no-nums
+  (lambda (lst)
+    (cond ((null? lst) '())
+          ((number? (car lst)) (no-nums (cdr lst)))
+          (else (cons (car lst) (no-nums (cdr lst)))))))
+
+(define all-nums
+  (lambda (lst)
+    (cond ((null? lst) '())
+          ((number? (car lst)) (cons (car lst) (all-nums (cdr lst))))
+          (else (all-nums (cdr lst))))))
+
+;; eqan? : Are the two arguments the same atom?
+(define eqan?
+  (lambda (a1 a2)
+    (cond ((and (number? a1) (number? a2)) (o= a1 a2))
+          ((or (number? a1) (number? a2)) #f)
+          (else (eq? a1 a2)))))
+
+(define occur
+  (lambda (needle haystack)
+    (cond ((null? haystack) 0)
+          ((eqan? needle (car haystack)) (add1 (occur needle (cdr haystack))))
+          (else (occur needle (cdr haystack))))))
+
+(define one?
+  (lambda (n)
+    (o= n 1)))
+           
