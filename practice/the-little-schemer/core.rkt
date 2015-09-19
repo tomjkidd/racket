@@ -9,15 +9,20 @@
          count-s-expr
          
          member?
+         member*
          rember
+         rember*
          multirember
          
          firsts
          insertR
+         insertR*
          multiinsertR
          insertL
+         insertL*
          multiinsertL
          subst
+         subst*
          multisubst
          subst2
 
@@ -45,6 +50,7 @@
 
          eqan?
          occur
+         occur*
 
          one?)
 
@@ -304,4 +310,64 @@ Possibilities
 (define one?
   (lambda (n)
     (o= n 1)))
-           
+
+(define rember*
+  (lambda (needle haystack)
+    (cond ((null? haystack) '())
+          ((atom? (car haystack))
+           (cond ((eqan? needle (car haystack)) (rember* needle (cdr haystack)))
+                 (else (cons (car haystack)
+                             (rember* needle (cdr haystack))))))
+          (else (cons (rember* needle (car haystack))
+                      (rember* needle (cdr haystack)))))))
+
+(define insertR*
+  (lambda (new old lst)
+    (cond ((null? lst) '())
+          ((atom? (car lst)) (let ((current (car lst))
+                                   (rest (cdr lst)))
+                                   (cond ((eq? current old)
+                                          (cons current (cons new (insertR* new old rest))))
+                                         (else (cons current (insertR* new old rest))))))
+          (else (cons (insertR* new old (car lst))
+                      (insertR* new old (cdr lst)))))))
+
+(define occur*
+  (lambda (needle haystack)
+    (cond ((null? haystack) 0)
+          ((atom? (car haystack))
+           (cond ((eq? needle (car haystack)) (add1 (occur* needle (cdr haystack))))
+                 (else (occur* needle (cdr haystack)))))
+          (else (o+ (occur* needle (car haystack))
+                    (occur* needle (cdr haystack)))))))
+
+(define subst*
+  (lambda (new old lst)
+    (cond ((null? lst) '())
+          ((atom? (car lst))
+           (cond ((eqan? (car lst) old)
+                  (cons new (subst* new old (cdr lst))))
+                 (else
+                  (cons (car lst) (subst* new old (cdr lst))))))
+          (else (cons (subst* new old (car lst))
+                      (subst* new old (cdr lst)))))))
+
+(define insertL*
+  (lambda (new old lst)
+    (cond ((null? lst) '())
+          ((atom? (car lst)) (let ((current (car lst))
+                                   (rest (cdr lst)))
+                                   (cond ((eq? current old)
+                                          (cons new (cons current (insertL* new old rest))))
+                                         (else (cons current (insertL* new old rest))))))
+          (else (cons (insertL* new old (car lst))
+                      (insertL* new old (cdr lst)))))))
+
+(define member*
+  (lambda (needle haystack)
+    (cond ((null? haystack) #f)
+          ((atom? (car haystack))
+           (cond ((eq? needle (car haystack)) #t)
+                 (else (member* needle (cdr haystack)))))
+          (else (or (member* needle (car haystack))
+                    (member* needle (cdr haystack)))))))
