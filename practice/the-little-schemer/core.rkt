@@ -19,7 +19,21 @@
          multiinsertL
          subst
          multisubst
-         subst2)
+         subst2
+
+         add1
+         sub1
+         o+
+         o-
+         o*
+         o>
+         o<
+         o=
+         oexpt
+         o/
+         tup?
+         addtup
+         tup+)
 
 ;; An atom is not a pair and not null (the empty list)
 (define atom?
@@ -147,3 +161,87 @@
           (else (cons (car lst) (subst2 new old1 old2 (cdr lst)))))))
               
 ;;(trace multirember)
+
+(define add1
+  (lambda (n)
+    (+ n 1)))
+
+(define sub1
+  (lambda (n)
+    (- n 1)))
+
+(define o+
+  (lambda (n m)
+    (cond ((zero? m) n)
+          (else (add1 (o+ n (sub1 m)))))))
+
+(define o-
+  (lambda (n m)
+    (cond ((zero? m) n)
+          (else (sub1 (o- n (sub1 m)))))))
+
+(define tup?
+  (lambda (lst)
+    (cond ((null? lst) #t)
+          ((number? (car lst)) (tup? (cdr lst)))
+          (else #f))))
+
+(define addtup
+  (lambda (tup)
+    (cond ((null? tup) 0)
+          (else (o+ (car tup) (addtup (cdr tup)))))))
+
+(define o*
+  (lambda (n m)
+    (cond ((zero? m) 0)
+          (else (o+ n (o* n (sub1 m)))))))
+
+#|
+Possibilities
+(null? tup1) (null? tup2)
+#f #f -> return (cons (o+ (car tup1) (car tup2) (tup+ (cdr tup1) (cdr tup2))
+#f #t -> return (cons (car tup2) (tup+ tup1 (cdr tup2)))
+#t #f -> return (cons (car tup1) (tup+ (cdr tup1) tup2))
+#t #t -> return '()
+|#
+(define tup+
+  (lambda (tup1 tup2)
+    (cond ((and (null? tup1) (null? tup2)) '())
+          ((null? tup1) tup2)
+          ((null? tup2) tup1)
+          (else (cons (o+ (car tup1) (car tup2))
+                      (tup+ (cdr tup1) (cdr tup2)))))))
+
+(define o>
+  (lambda (n m)
+    (cond ((zero? n) #f)
+          ((zero? m) #t)
+          (else (o> (sub1 n) (sub1 m))))))
+
+(define o<
+  (lambda (n m)
+    (cond ((zero? m) #f)
+          ((zero? n) #t)
+          (else (o< (sub1 n) (sub1 m))))))
+
+(define o=-first
+  (lambda (n m)
+    (cond ((zero? m) (zero? n))
+          ((zero? n) #f)
+          (else (o= (sub1 n) (sub1 m))))))
+
+(define o=
+  (lambda (n m)
+    (cond ((o< n m) #f)
+          ((o> n m) #f)
+          (else #t))))
+
+(define oexpt
+  (lambda (n m)
+    (cond ((zero? m) 1)
+          (else (o* n (oexpt n (sub1 m)))))))
+
+(define o/
+  (lambda (n m)
+    (cond ((o< n m) 0)
+          (else (add1 (o/ (o- n m) m))))))
