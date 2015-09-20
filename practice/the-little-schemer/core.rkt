@@ -52,7 +52,11 @@
          occur
          occur*
 
-         one?)
+         one?
+
+         leftmost
+
+         eqlist?)
 
 ;; An atom is not a pair and not null (the empty list)
 (define atom?
@@ -113,7 +117,7 @@
 (define rember
   (lambda (needle haystack)
     (cond ((null? haystack) '())
-          ((eq? needle (car haystack)) (cdr haystack))
+          ((equal? needle (car haystack)) (cdr haystack))
           (else (cons (car haystack) (rember needle (cdr haystack)))))))
 
 ;; multirember: Remove all occurences of needle from haystack
@@ -371,3 +375,67 @@ Possibilities
                  (else (member* needle (cdr haystack)))))
           (else (or (member* needle (car haystack))
                     (member* needle (cdr haystack)))))))
+
+(define leftmost
+  (lambda (lst)
+    (cond ((atom? (car lst)) (car lst))
+          (else (leftmost (car lst))))))
+#|
+What are the possibilities for arguments?
+l1 can be {null, have an atom at head, have a list at head}
+l2 can be {null, have an atom at head, have a list at head}
+
+l1 l2
+null null -> #t
+null atom -> #f
+null list -> #f
+atom null -> #f
+atom atom -> #t if eqan? for atoms and eqlist? for cdr of lists
+atom list -> #f
+list null -> #f
+list atom -> #f
+list list -> #t if eqlist? for car of lists and eqlist for cdr of lists
+|#
+(define eqlist-1?
+  (lambda (l1 l2)
+    (cond ((and (null? l1) (null? l2)) #t)
+          ((and (null? l1) (atom? (car l2))) #f)
+          ((and (null? l1) (list? l2)) #f)
+          
+          ((and (atom? (car l1)) (null? l2)) #f)
+          ((and (atom? (car l1)) (atom? (car l2)))
+           (and (eqan? (car l1) (car l2))
+                (eqlist? (cdr l1) (cdr l2))))
+          ((and (atom? (car l1)) (list? l2)) #f)
+          
+          ((and (list? (car l1)) (null? l2)) #f)
+          ((and (list? (car l1)) (atom? (car l2))) #f)
+          ((and (list? (car l2)) (list? (car l2)))
+           (and (eqlist? (car l1) (car l2))
+                (eqlist? (cdr l1) (cdr l2)))))))
+
+(define eqlist-2?
+  (lambda (l1 l2)
+    (cond ((and (null? l1) (null? l2)) #t)
+          ((or (null? l1) (null? l2)) #f)
+
+          ((and (atom? (car l1)) (atom? (car l2)))
+           (and (eqan? (car l1) (car l2))
+                (eqlist? (cdr l1) (cdr l2))))
+          ((or (atom? (car l1)) (atom? (car l2))) #f)
+          
+          (else (and (eqlist? (car l1) (car l2))
+                     (eqlist? (cdr l1) (cdr l2)))))))
+
+(define eqlist?
+  (lambda (l1 l2)
+    (cond ((and (null? l1) (null? l2)) #t)
+          ((or (null? l1) (null? l2)) #f)
+          (else (and (equal? (car l1) (car l2))
+                     (eqlist? (cdr l1) (cdr l2)))))))
+
+(define equal?
+  (lambda (s1 s2)
+    (cond ((and (atom? s1) (atom? s2)) (eqan? s1 s2))
+          ((or (atom? s1) (atom? s2)) #f)
+          (else (eqlist? s1 s2)))))

@@ -63,3 +63,58 @@ when using sub1, test termination with zero?.
                  (list 'chips (list '(with) 'fish)
                        '(chips))))
 (member* 'chips l5)
+(leftmost l5)
+(leftmost (list (list '(hot)
+                      (list 'tuna '(and))
+                      'cheese)))
+#|(leftmost (list (list (list '()))
+                17
+                '(seventeen)))|#
+;;(leftmost '())
+(define l6 '(mozzarella pizza))
+(and (atom? (car l6))
+     (eq? (car l6) 'pizza))
+
+(define l7 (list '(mozzarella mushroom) 'pizza))
+(and (atom? (car l7))
+     (eq? (car l7) 'pizza))
+
+(define l8 '(pizza))
+(and (atom? (car l8))
+     (eq? (car l8) 'pizza))
+
+(display 'eqlist?)
+(newline)
+
+(eqlist? '(strawberry ice cream)
+         '(strawberry ice cream))
+
+(eqlist? '(strawberry ice cream)
+         '(strawberry cream ice))
+
+(eqlist? (list 'banana (list '(split)))
+         (list '(banana) '(split)))
+
+(eqlist? (list 'beef (list '(sausage)) (list 'and '(soda)))
+         (list 'beef (list '(salami)) (list 'and '(soda))))
+
+(eqlist? (list 'beef (list '(sausage)) (list 'and '(soda)))
+         (list 'beef (list '(sausage)) (list 'and '(soda))))
+
+(display 'tests)
+(newline)
+(eqlist? '() '())
+(eqlist? '() '(bar))
+(eqlist? '() (list '(test)))
+(eqlist? '(foo) '())
+(eqlist? '(foo) '(foo))
+(eqlist? '(foo) (list '(foo)))
+(eqlist? (list '(foo) 'bar) '())
+(eqlist? (list '(foo) 'bar) '(bar))
+(eqlist? (list '(foo) 'bar) (list '(foo) 'bar))
+
+#|
+The Sixth Commandment
+Simplify only after the function is correct.
+|#
+
