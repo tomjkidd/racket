@@ -110,7 +110,7 @@
 (define member?
   (lambda (needle haystack)
     (cond ((null? haystack) #f)
-          ((eq? needle (car haystack)) #t)
+          ((equal? needle (car haystack)) #t)
           (else (member? needle (cdr haystack))))))
 
 ;; rmember: Remove first occurence of needle from haystack
