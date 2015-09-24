@@ -1,5 +1,7 @@
 #lang racket
 
+(require "core.rkt")
+
 (provide rember-f-first
          rember-f
          eq?-c
@@ -7,7 +9,11 @@
          insertL-f
          insertR-f
          subst-f
-         rember-f2)
+         rember-f2
+         atom-to-function
+         multirember-f
+         multirember-eq?
+         multiremberT)
 
 (define rember-f-first
   (lambda (fn needle haystack)
@@ -88,6 +94,26 @@
 (define rember-f2
   (lambda (fn)
     (lambda (needle haystack)
-      (((insert-g seqrem) fn) #f needle haystack))))
+      (((insert-g seqrem) fn) void needle haystack))))
+
+(define multirember-f
+  (lambda (fn)
+    (lambda (needle haystack)
+      (cond ((null? haystack) '())
+            ((fn needle (car haystack))
+             ((multirember-f fn) needle (cdr haystack)))
+            (else (cons (car haystack)
+                        ((multirember-f fn) needle (cdr haystack))))))))
+(define multirember-eq?
+  (multirember-f eq?))
+
+(define multiremberT
+  (lambda (fn lat)
+    (cond ((null? lat) '())
+          ((fn (car lat))
+           (multiremberT fn (cdr lat)))
+          (else (cons (car lat)
+                      (multiremberT fn (cdr lat)))))))
+          
           
           

@@ -4,7 +4,8 @@
 
 (provide aexp? ;; arithmetic expression
          numbered?
-         value)
+         value
+         operator)
 
 (define aexp?
   (lambda (x)
@@ -26,7 +27,7 @@
            (and (numbered? (1st-sub-exp aexp))
                 (numbered? (2nd-sub-exp aexp)))))))
 
-(define value
+(define value-first
   (lambda (nexp)
     (cond ((atom? nexp) nexp)
           ((eq? (operator nexp)'+)
@@ -38,6 +39,14 @@
           (else
            (oexpt (value (1st-sub-exp nexp))
                   (value (2nd-sub-exp nexp)))))))
+
+;; Using Chapter 8 ideas
+(define value
+  (lambda (nexp)
+    (cond ((atom? nexp) nexp)
+          (else ((atom-to-function (operator nexp))
+                 (value (1st-sub-exp nexp))
+                 (value (2nd-sub-exp nexp)))))))
 
 #|
 The Eighth Commandment:
@@ -54,5 +63,3 @@ Use help functions to abstract from representations
 (define operator
   (lambda (aexp)
     (car (cdr aexp))))
-          
-          

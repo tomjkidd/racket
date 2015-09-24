@@ -56,7 +56,8 @@
 
          leftmost
 
-         eqlist?)
+         eqlist?
+         atom-to-function)
 
 ;; An atom is not a pair and not null (the empty list)
 (define atom?
@@ -439,3 +440,9 @@ list list -> #t if eqlist? for car of lists and eqlist for cdr of lists
     (cond ((and (atom? s1) (atom? s2)) (eqan? s1 s2))
           ((or (atom? s1) (atom? s2)) #f)
           (else (eqlist? s1 s2)))))
+
+(define atom-to-function
+  (lambda (x)
+    (cond ((eq? x '+) o+)
+          ((eq? x 'x) o*)
+          (else expt))))
