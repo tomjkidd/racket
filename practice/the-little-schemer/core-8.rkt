@@ -13,7 +13,9 @@
          atom-to-function
          multirember-f
          multirember-eq?
-         multiremberT)
+         multiremberT
+
+         multirember&co)
 
 (define rember-f-first
   (lambda (fn needle haystack)
@@ -114,6 +116,27 @@
            (multiremberT fn (cdr lat)))
           (else (cons (car lat)
                       (multiremberT fn (cdr lat)))))))
+
+#|
+col is a function that takes 2 arguments
+It is short for "collector", and sometimes called a "continuation"
+|#
+(define multirember&co
+  (lambda (a lat col)
+    (cond ((null? lat)
+           (col '() '()))
+          ((eq? (car lat) a)
+           (multirember&co a
+                           (cdr lat)
+                           (lambda (newlat seen)
+                             (col newlat
+                                  (cons (car lat) seen)))))
+          (else
+           (multirember&co a
+                           (cdr lat)
+                           (lambda (newlat seen)
+                             (col (cons (car lat) newlat)
+                                  seen)))))))
           
           
           

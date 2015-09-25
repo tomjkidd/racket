@@ -39,3 +39,42 @@ Abstract common patterns with a new function
 
 (eq?-tuna 'bass)
 (eq?-tuna 'tuna)
+
+(multiremberT eq?-tuna '(shrimp salad tuna salad and tuna))
+
+(define a-friend
+  (lambda (x y)
+    (null? y)))
+
+(define 2nd-arg-null? a-friend)
+
+(multirember&co 'tuna '(strawberries tuna and swordfish) 2nd-arg-null?)
+(multirember&co 'tuna '() 2nd-arg-null?)
+(multirember&co 'tuna '(tuna) 2nd-arg-null?)
+(multirember&co 'tuna '(and tuna) 2nd-arg-null?)
+
+(define new-friend
+  (lambda (newlat seen)
+    (a-friend newlat
+         (cons 'tuna seen))))
+
+(define latest-friend
+  (lambda (newlat seen)
+    (a-friend (cons '(and) newlat)
+              seen)))
+
+(define last-friend
+  (lambda (x y)
+    (length x)))
+
+(multirember&co 'tuna '(strawberries tuna and swordfish) last-friend)
+
+(multirember&co 'tuna '(tuna bacon tuna beef)
+                (lambda (x y)
+                  (and (eqlist? x '(bacon beef))
+                       (eqlist? y '(tuna tuna)))))
+
+#|
+The Tenth Commandment
+Build functions to collect more than one value at a time
+|#
