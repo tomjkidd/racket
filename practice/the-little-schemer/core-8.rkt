@@ -1,6 +1,7 @@
 #lang racket
 
 (require "core.rkt")
+(require racket/trace)
 
 (provide rember-f-first
          rember-f
@@ -15,7 +16,12 @@
          multirember-eq?
          multiremberT
 
-         multirember&co)
+         multirember&co
+         multiinsertLR
+         multiinsertLR&co
+
+         evens-only*
+         evens-only*&co)
 
 (define rember-f-first
   (lambda (fn needle haystack)
@@ -137,6 +143,81 @@ It is short for "collector", and sometimes called a "continuation"
                            (lambda (newlat seen)
                              (col (cons (car lat) newlat)
                                   seen)))))))
-          
+
+(define multiinsertLR
+  (lambda (new oldL oldR lst)
+    (cond ((null? lst) '())
+          ((eq? (car lst) oldL)
+           (cons new
+                 (cons oldL
+                       (multiinsertLR new oldL oldR (cdr lst)))))
+          ((eq? (car lst) oldR)
+           (cons oldR
+                 (cons new
+                       (multiinsertLR new oldL oldR (cdr lst)))))
+          (else (cons (car lst)
+                      (multiinsertLR new oldL oldR (cdr lst)))))))
+
+(define multiinsertLR&co
+  (lambda (new oldL oldR lat col)
+    (cond ((null? lat) (col '() 0 0))
+          ((eq? (car lat) oldL)
+           (multiinsertLR&co new oldL oldR
+                             (cdr lat)
+                             (lambda (newlat L R)
+                               (col (cons new (cons oldL newlat))
+                                    (add1 L)
+                                    R))))
+          ((eq? (car lat) oldR)
+           (multiinsertLR&co new oldL oldR
+                             (cdr lat)
+                             (lambda (newlat L R)
+                               (col (cons oldR (cons new newlat))
+                                    L
+                                    (add1 R)))))
+          (else (multiinsertLR&co new oldL oldR
+                             (cdr lat)
+                             (lambda (newlat L R)
+                               (col (cons (car lat) newlat)
+                                    L
+                                    R)))))))
+
+(define evens-only*
+  (lambda (lst)
+    (cond ((null? lst) '())
+          ((atom? (car lst))
+           (cond ((even? (car lst))
+                  (cons (car lst)
+                        (evens-only* (cdr lst))))
+                 (else (evens-only* (cdr lst)))))
+          (else (cons (evens-only* (car lst))
+                      (evens-only* (cdr lst)))))))
+
+(define even?
+  (lambda (n)
+    (o= (o* (o/ n 2) 2) n)))
+
+(define evens-only*&co
+  (lambda (lst col)
+    (cond ((null? lst) (col lst 1 0))
+          ((atom? (car lst))
+           (cond ((even? (car lst))
+                  (evens-only*&co (cdr lst)
+                                 (lambda (newlst p s)
+                                   (col (cons (car lst) newlst)
+                                        (o* (car lst) p)
+                                        s))))
+                 (else (evens-only*&co (cdr lst)
+                                       (lambda (newlst p s)
+                                         (col newlst
+                                              p
+                                              (o+ (car lst) s)))))))
+          (else (evens-only*&co (car lst)
+                                (lambda (al ap as)
+                                  (evens-only*&co (cdr lst)
+                                                  (lambda (dl dp ds)
+                                                    (col (cons al dl)
+                                                         (o* ap dp)
+                                                         (o+ as ds))))))))))
           
           

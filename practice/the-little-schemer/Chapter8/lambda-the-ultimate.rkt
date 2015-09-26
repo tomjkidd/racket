@@ -78,3 +78,44 @@ Abstract common patterns with a new function
 The Tenth Commandment
 Build functions to collect more than one value at a time
 |#
+
+(multiinsertLR 'new 'oldL 'oldR '(an oldL an oldR))
+
+;; NOTE: This does NOT insert new on both the left and right of old!
+(multiinsertLR 'new 'old 'old '(an old and another old))
+
+(define multiinsertLR&co-display
+  (lambda (lst L R)
+    (display lst)
+    (newline)
+    (display L)
+    (newline)
+    (display R)
+    (newline)))
+
+(multiinsertLR&co 'new 'oldL 'oldR '(an oldL an oldR) multiinsertLR&co-display)
+(multiinsertLR&co 'new 'oldL 'oldR '(oldL oldR oldL) multiinsertLR&co-display)
+
+(multiinsertLR&co 'salty 'fish 'chips '(chips and fish or fish and chips)
+                  multiinsertLR&co-display)
+
+(evens-only* '(1 2 3 4))
+(evens-only* (list '(9 1 2 8) 3 10 (list '(9 9) 7 6) 2))
+
+(define evens-only*&co-dsiplay
+  (lambda (lst s p)
+    (display lst)
+    (newline)
+    (display s)
+    (newline)
+    (display p)
+    (newline)))
+
+(evens-only*&co (list '(9 1 2 8) 3 10 (list '(9 9) 7 6) 2) evens-only*&co-dsiplay)
+
+(define the-last-friend
+  (lambda (newl product sum)
+    (cons sum
+          (cons product newl))))
+
+(evens-only*&co (list '(9 1 2 8) 3 10 (list '(9 9) 7 6) 2) the-last-friend)
