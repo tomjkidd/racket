@@ -21,6 +21,7 @@
          rel?
          fun?
 
+         revpair
          revrel
 
          fullfun?
@@ -155,5 +156,3 @@
 (define seconds
   (lambda (lst)
     (map (lambda (p) (car (cdr p))) lst)))
-    
-           
