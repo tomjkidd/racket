@@ -25,3 +25,13 @@ looking asks for 1 -> 7 -> 3 -> 2 -> 1 -> 7, which then repeats over an over.
 
 (A 1 2)
 ;; (A 4 3) ;; Does not terminate.
+
+;; NOTE: will-stop? is the first function that we can describe precisely but cannot define in our language.
+;; Credit to Alan M. Turing and Kurt Godel
+(will-stop? length) ;; Should be #t
+(will-stop? enternity) ;; Should be #f
+
+(define last-try
+  (lambda (x)
+    (and (will-stop? last-try)
+         (eternity x))))

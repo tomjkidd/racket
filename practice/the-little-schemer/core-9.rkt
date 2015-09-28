@@ -11,8 +11,10 @@
          weight*
          shuffle
 
+         eternity
          C
-         A)
+         A
+         will-stop?)
 
 (define looking
   (lambda (a lat)
@@ -81,3 +83,20 @@
           ((zero? m) (A (sub1 n) 1))
           (else (A (sub1 n)
                    (A n (sub1 m)))))))
+
+(define will-stop?
+  (lambda (f)
+    void))
+
+((lambda (length)
+   (lambda (l)
+     (cond ((null? l 0))
+           (else (add1 (length (cdr l)))))))
+ eternity)
+
+((lambda (mk-length)
+   (mk-length eternity))
+ (lambda (length)
+   (lambda (l)
+     (cond ((null? l) 0)
+           (else (add1 (length (cdr l))))))))
