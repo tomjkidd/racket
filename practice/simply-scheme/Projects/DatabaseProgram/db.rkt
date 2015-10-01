@@ -15,7 +15,10 @@
          list-db
 
          display-field
-         display-record)
+         display-record
+
+         record-index-valid?
+         edit-record)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -90,10 +93,26 @@
 
 (define (display-record-helper records fields record-index)
   (if (null? records)
-      (display "listed")
+      (begin
+        (display "listed")
+        (newline))
       (begin
         (display-record (car records) fields record-index)
         (display-record-helper (cdr records) fields (+ record-index 1)))))
               
 (define (list-db)
-  (display-record-helper (db-records (current-db)) (db-fields (current-db)) 1))
+  (display-record-helper (reverse (db-records (current-db))) (db-fields (current-db)) 1))
+
+(define record-index-valid?
+  (lambda (index)
+    (one-based-index-valid? (db-records (current-db)) index)))
+
+(define edit-record
+  (lambda (index)
+    (cond ((record-index-valid? index)
+           (display-record (list-ref (reverse (db-records (current-db))) (- index 1))
+                           (db-fields (current-db))
+                           (- index 1))                           
+           (display "Edit which field?"))
+          (else (display " is not a valid record")
+                (newline)))))

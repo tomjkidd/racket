@@ -3,7 +3,8 @@
 (require (planet dyoo/simply-scheme:2))
 (require racket/trace)
 
-(provide for-each-with-index)
+(provide for-each-with-index
+         one-based-index-valid?)
 
 (define (for-each-with-index fn lst)
   (for-each-with-index-helper lst fn 0))
@@ -14,3 +15,9 @@
       (begin
         (fn (car lst) index)
         (for-each-with-index-helper (cdr lst) fn (+ index 1)))))
+
+(define one-based-index-valid?
+  (lambda (lst index)
+    (and (number? index)
+         (<= index (length lst))
+         (> index 0))))
