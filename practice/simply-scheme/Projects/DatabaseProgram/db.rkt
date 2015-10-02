@@ -107,13 +107,56 @@
   (lambda (index)
     (one-based-index-valid? (db-records (current-db)) index)))
 
+(define field-valid?
+  (lambda (field fields)
+    (member? field fields)))
+
+(define get-field-index
+  (lambda (field fields)
+    (get-field-helper field fields 0)))
+
+(define get-field-helper
+  (lambda (field fields index)
+    (if (equal? field (car fields))
+        index
+        (get-field-helper field (cdr fields) (+ index 1)))))
+
+(define update-field
+  (lambda (record index value)
+    (vector-set! record index value)))
+
+(define ask-to-edit
+  (lambda (record fields)
+    (display "Edit which field?")
+    (let ((field (read)))
+      (cond ((eq? field #f)
+             #f)
+            ((field-valid? field fields)
+             (begin
+               (display "New value for ")
+               (display field)
+               (display "--> ")
+               (let ((val (read)))
+                 (update-field record (get-field-index field fields) val)
+                 (display val)
+                 (newline))
+               #t))
+            (else (begin (display field)
+                         (display " is not valid")
+                         (newline)
+                         #f))))))
+
 (define edit-record
   (lambda (index)
     (cond ((record-index-valid? index)
-           (display-record (list-ref (reverse (db-records (current-db))) (- index 1))
-                           (db-fields (current-db))
-                           index)                           
-           (display "Edit which field?"))
+           (let ((record (list-ref (reverse (db-records (current-db))) (- index 1)))
+                 (fields (db-fields (current-db))))
+             (display-record record
+                             fields
+                             index)
+             (if (ask-to-edit record fields)
+                 (edit-record index)
+                 (display "Edited"))))
           (else (display index)
                 (display " is not a valid record")
                 (newline)))))
