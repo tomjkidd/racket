@@ -37,3 +37,8 @@ NOTE: This is a small script of input to test the basic edit functionality.
 "bees"
 #f
 |#
+
+(save-db)
+(load-db "test")
+(list-db)
+(count-db)

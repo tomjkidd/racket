@@ -18,7 +18,10 @@
          display-record
 
          record-index-valid?
-         edit-record)
+         edit-record
+
+         save-db
+         load-db)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -160,3 +163,23 @@
           (else (display index)
                 (display " is not a valid record")
                 (newline)))))
+
+(define save-db
+  (lambda ()
+    (delete-if-exists (db-filename (current-db)))
+    (let ((port (open-output-file (db-filename (current-db)))))
+      (write (db-filename (current-db)) port)
+      (newline port)
+      (write (db-fields (current-db)) port)
+      (newline port)
+      (write (db-records (current-db)) port)
+      (newline port)
+      (close-output-port port))))
+
+(define load-db
+  (lambda (filename)
+    (let ((port (open-input-file filename)))
+      (db-set-filename! (current-db) (read port))
+      (db-set-fields! (current-db) (read port))
+      (db-set-records! (current-db) (read port))
+      (close-input-port port))))

@@ -4,7 +4,8 @@
 (require racket/trace)
 
 (provide for-each-with-index
-         one-based-index-valid?)
+         one-based-index-valid?
+         delete-if-exists)
 
 (define (for-each-with-index fn lst)
   (for-each-with-index-helper lst fn 0))
@@ -21,3 +22,8 @@
     (and (number? index)
          (<= index (length lst))
          (> index 0))))
+
+(define (delete-if-exists name)
+  (if (file-exists? name)
+      (delete-file name)
+      void))
