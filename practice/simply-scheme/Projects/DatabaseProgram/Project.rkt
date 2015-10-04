@@ -7,9 +7,9 @@
 (new-db "test" '("Column A" "Column B"))
 (db-insert (vector 1 2) (current-db))
 (db-insert (vector 3 4) (current-db))
-(db-insert (vector 5 6) (current-db))
+(db-insert (vector 7 8) (current-db))
 
-(count-db)
+#|(count-db)
 (list-db)
 
 (define record-check
@@ -28,7 +28,7 @@
 (record-check 2)
 (record-check 3)
 (record-check 4)
-(newline)
+(newline)|#
 
 #|
 NOTE: This is a small script of input to test the basic edit functionality.
@@ -38,7 +38,7 @@ NOTE: This is a small script of input to test the basic edit functionality.
 #f
 |#
 
-(save-db)
+#|(save-db)
 (load-db "test")
 (list-db)
-(count-db)
+(count-db)|#

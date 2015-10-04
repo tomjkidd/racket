@@ -11,7 +11,8 @@
          db-records
          db-set-records!)
 
-;; The database ADT: a filename, list of fields, and list of records
+;; The database ADT:
+;; db is a vector made of a filename, list of fields, and list of records
 
 ;; Note vector is like make-vector, except that it uses argument directly to set elements.
 

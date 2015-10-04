@@ -42,6 +42,7 @@
 
 ;; Public interface
 (define (new-db filename fields)
+  (clear-current-db!)
   (set-current-db! (make-db filename fields '())))
 
 (define (insert)
@@ -178,8 +179,20 @@
 
 (define load-db
   (lambda (filename)
+    (clear-current-db!)
     (let ((port (open-input-file filename)))
-      (db-set-filename! (current-db) (read port))
-      (db-set-fields! (current-db) (read port))
-      (db-set-records! (current-db) (read port))
+      (let ((filename (read port))
+            (fields (read port)))
+        (new-db filename fields)
+        (db-set-records! (current-db) (read port)))
       (close-input-port port))))
+
+(define (clear-current-db!)
+  (if (not (no-db?))
+      (begin
+        (if (ask "Do you want to save the current database?")
+            (save-db)
+            void)
+        (vector-set! current-state 0 #f))
+      void))
+        
