@@ -21,7 +21,11 @@
          edit-record
 
          save-db
-         load-db)
+         load-db
+
+         get
+         blank-record
+         record-set!)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -105,7 +109,7 @@
         (display-record-helper (cdr records) fields (+ record-index 1)))))
               
 (define (list-db)
-  (display-record-helper (reverse (db-records (current-db))) (db-fields (current-db)) 1))
+  (display-record-helper (db-records (current-db)) (db-fields (current-db)) 1))
 
 (define record-index-valid?
   (lambda (index)
@@ -153,7 +157,7 @@
 (define edit-record
   (lambda (index)
     (cond ((record-index-valid? index)
-           (let ((record (list-ref (reverse (db-records (current-db))) (- index 1)))
+           (let ((record (list-ref (db-records (current-db)) (- index 1)))
                  (fields (db-fields (current-db))))
              (display-record record
                              fields
@@ -195,4 +199,20 @@
             void)
         (vector-set! current-state 0 #f))
       void))
+
+(define get
+  (lambda (fieldname record)
+    (let ((fields (current-fields)))
+      (vector-ref record (get-field-index fieldname fields)))))
+
+(define blank-record
+  (lambda ()
+    (make-vector (length (current-fields)) #f)))
+
+;; NOTE: Just created an adapter to incorporate the suggested interface into
+;; my first implementation.
+(define record-set!
+  (lambda (fieldname record value)
+    (let ((fields (current-fields)))
+      (update-field record (get-field-index fieldname fields) value))))
         

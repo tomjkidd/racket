@@ -4,10 +4,10 @@
 (require racket/trace)
 (require "db.rkt")
 
-(new-db "test" '("Column A" "Column B"))
+#|(new-db "test" '("Column A" "Column B"))
 (db-insert (vector 1 2) (current-db))
 (db-insert (vector 3 4) (current-db))
-(db-insert (vector 7 8) (current-db))
+(db-insert (vector 7 8) (current-db))|#
 
 #|(count-db)
 (list-db)
@@ -42,3 +42,23 @@ NOTE: This is a small script of input to test the basic edit functionality.
 (load-db "test")
 (list-db)
 (count-db)|#
+
+(new-db "albums" '(artist title year brain-likes?))
+(db-insert (vector '(the beatles) "A Hard Day's Night" 1964 #t) (current-db))
+(db-insert (vector '(the zombies) "Odessey and Oracle" 1967 #t) (current-db))
+(db-insert (vector '(frank zappa) "Hot Rats" 1970 #f) (current-db))
+(db-insert (vector '(the beatles) "Rubber Soul" 1965 #t) (current-db))
+
+(list-db)
+
+(define blank (blank-record))
+(record-set! "artist" blank "Led Zeppelin")
+(record-set! "title" blank "IV")
+(record-set! "year" blank "1971")
+(record-set! "brain-likes?" blank #f)
+
+blank
+
+(db-insert blank (current-db))
+
+(list-db)
