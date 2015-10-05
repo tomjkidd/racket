@@ -43,7 +43,7 @@ NOTE: This is a small script of input to test the basic edit functionality.
 (list-db)
 (count-db)|#
 
-(new-db "albums" '(artist title year brain-likes?))
+(new-db "albums" '(artist title year brian-likes?))
 (db-insert (vector '(the beatles) "A Hard Day's Night" 1964 #t) (current-db))
 (db-insert (vector '(the zombies) "Odessey and Oracle" 1967 #t) (current-db))
 (db-insert (vector '(frank zappa) "Hot Rats" 1970 #f) (current-db))
@@ -55,7 +55,7 @@ NOTE: This is a small script of input to test the basic edit functionality.
 (record-set! "artist" blank "Led Zeppelin")
 (record-set! "title" blank "IV")
 (record-set! "year" blank "1971")
-(record-set! "brain-likes?" blank #f)
+(record-set! "brian-likes?" blank #f)
 
 blank
 
