@@ -2,6 +2,7 @@
 
 (require (planet dyoo/simply-scheme:2))
 (require racket/trace)
+(require "core.rkt")
 (require "db.rkt")
 
 #|(new-db "test" '("Column A" "Column B"))
@@ -62,3 +63,7 @@ blank
 (db-insert blank (current-db))
 
 (list-db)
+
+(sort-mod (lambda (r1 r2) (< r1 r2)) '(2 4 3 5 1))
+(sort-mod (lambda (r1 r2) (string<? r1 r2)) '("A" "C" "E" "D" "F" "B"))
+

@@ -44,6 +44,9 @@
 (define (current-fields)
   (db-fields (current-db)))
 
+(define (current-records)
+  (db-records (current-db)))
+
 ;; Public interface
 (define (new-db filename fields)
   (clear-current-db!)
@@ -215,4 +218,10 @@
   (lambda (fieldname record value)
     (let ((fields (current-fields)))
       (update-field record (get-field-index fieldname fields) value))))
+
+(define (sort-db predicate)
+  ;; Access record list from db
+  ;; Sort records into new list
+  ;; Save new list into db
+  void)
         
