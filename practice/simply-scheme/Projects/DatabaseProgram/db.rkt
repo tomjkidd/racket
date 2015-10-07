@@ -25,7 +25,9 @@
 
          get
          blank-record
-         record-set!)
+         record-set!
+
+         sort-db)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -221,7 +223,7 @@
 
 (define (sort-db predicate)
   ;; Access record list from db
-  ;; Sort records into new list
-  ;; Save new list into db
-  void)
+  
+  (db-set-records! (current-db)
+                   (sort-mod predicate (current-records))))
         

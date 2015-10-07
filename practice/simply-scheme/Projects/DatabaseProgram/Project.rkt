@@ -49,6 +49,7 @@ NOTE: This is a small script of input to test the basic edit functionality.
 (db-insert (vector '(the zombies) "Odessey and Oracle" 1967 #t) (current-db))
 (db-insert (vector '(frank zappa) "Hot Rats" 1970 #f) (current-db))
 (db-insert (vector '(the beatles) "Rubber Soul" 1965 #t) (current-db))
+(db-insert (vector '(the bill frisell band) "Where in the world?" 1991 #f) (current-db))
 
 (list-db)
 
@@ -67,3 +68,8 @@ blank
 (sort-mod (lambda (r1 r2) (< r1 r2)) '(2 4 3 5 1))
 (sort-mod (lambda (r1 r2) (string<? r1 r2)) '("A" "C" "E" "D" "F" "B"))
 
+(sort-db (lambda (r1 r2) (before? (get 'title r1) (get 'title r2))))
+(list-db)
+
+(sort-db (lambda (r1 r2) (< (get 'year r1) (get 'year r2))))
+(list-db)
