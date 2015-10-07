@@ -65,11 +65,22 @@ blank
 
 (list-db)
 
-(sort-mod (lambda (r1 r2) (< r1 r2)) '(2 4 3 5 1))
+#|(sort-mod (lambda (r1 r2) (< r1 r2)) '(2 4 3 5 1))
 (sort-mod (lambda (r1 r2) (string<? r1 r2)) '("A" "C" "E" "D" "F" "B"))
 
 (sort-db (lambda (r1 r2) (before? (get 'title r1) (get 'title r2))))
 (list-db)
 
 (sort-db (lambda (r1 r2) (< (get 'year r1) (get 'year r2))))
+(list-db)|#
+
+(display "Sorted by title using sort-on-by")
+(newline)
+(sort-on-by 'title before?)
+(list-db)
+(newline)
+
+(display "Sorted by year using sort-on-by")
+(newline)
+(sort-on-by 'year <)
 (list-db)

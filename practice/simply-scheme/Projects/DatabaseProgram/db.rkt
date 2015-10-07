@@ -27,7 +27,8 @@
          blank-record
          record-set!
 
-         sort-db)
+         sort-db
+         sort-on-by)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -226,4 +227,9 @@
   
   (db-set-records! (current-db)
                    (sort-mod predicate (current-records))))
+
+(define sort-on-by
+  (lambda (fieldname predicate)
+    (sort-db (lambda (r1 r2) (predicate (get fieldname r1)
+                                        (get fieldname r2))))))
         
