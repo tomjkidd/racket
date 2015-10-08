@@ -88,3 +88,14 @@ blank
 (generic-before? '(in line) 'rambler)
 (generic-before? '(news for lulu) 'cobra)
 
+(display "Sorted by title using sort-on")
+(newline)
+(sort-on 'title)
+(list-db)
+(newline)
+
+(display "Sorted by year using sort-on")
+(newline)
+(sort-on 'year)
+(list-db)
+(newline)

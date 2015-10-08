@@ -29,7 +29,8 @@
 
          sort-db
          sort-on-by
-         generic-before?)
+         generic-before?
+         sort-on)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -243,3 +244,8 @@
           ((word? arg1) (generic-before? (list arg1) arg2))
           ((word? arg2) (generic-before? arg1 (list arg2)))
           (else (sent-before? arg1 arg2)))))
+
+(define sort-on
+  (lambda (fieldname)
+    (sort-db (lambda (r1 r2) (generic-before? (get fieldname r1)
+                                             (get fieldname r2))))))
