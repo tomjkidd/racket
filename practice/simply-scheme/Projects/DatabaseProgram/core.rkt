@@ -6,7 +6,8 @@
 (provide for-each-with-index
          one-based-index-valid?
          delete-if-exists
-         sort-mod)
+         sort-mod
+         sent-before?)
 
 (define (for-each-with-index fn lst)
   (for-each-with-index-helper lst fn 0))
@@ -49,3 +50,10 @@
           (else
            (let ((reduction (reduce (sort-reducer fn) lst)))
              (cons reduction (sort-mod fn (rember reduction lst))))))))
+
+(define (sent-before? sent1 sent2)
+  (cond ((null? sent1) #t)
+        ((null? sent2) #f)
+        ((before? (car sent1) (car sent2)) #t)
+        ((before? (car sent2) (car sent1)) #f)
+        (else (sent-before? (cdr sent1) (cdr sent2)))))

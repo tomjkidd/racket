@@ -28,7 +28,8 @@
          record-set!
 
          sort-db
-         sort-on-by)
+         sort-on-by
+         generic-before?)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -232,4 +233,13 @@
   (lambda (fieldname predicate)
     (sort-db (lambda (r1 r2) (predicate (get fieldname r1)
                                         (get fieldname r2))))))
-        
+
+(define generic-before?
+  (lambda (arg1 arg2)
+    (cond ((and (number? arg1) (number? arg2))
+           (< arg1 arg2))
+          ((and (word? arg1) (word? arg2))
+           (before? arg1 arg2))
+          ((word? arg1) (generic-before? (list arg1) arg2))
+          ((word? arg2) (generic-before? arg1 (list arg2)))
+          (else (sent-before? arg1 arg2)))))

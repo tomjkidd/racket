@@ -84,3 +84,7 @@ blank
 (newline)
 (sort-on-by 'year <)
 (list-db)
+
+(generic-before? '(in line) 'rambler)
+(generic-before? '(news for lulu) 'cobra)
+
