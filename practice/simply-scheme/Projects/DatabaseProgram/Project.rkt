@@ -99,3 +99,9 @@ blank
 (sort-on 'year)
 (list-db)
 (newline)
+
+(display "Adding rock category")
+(newline)
+(add-field 'category 'rock)
+(list-db)
+(newline)

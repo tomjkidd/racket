@@ -30,7 +30,9 @@
          sort-db
          sort-on-by
          generic-before?
-         sort-on)
+         sort-on
+
+         add-field)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -208,21 +210,30 @@
         (vector-set! current-state 0 #f))
       void))
 
+(define (get-with-these-fields fields)
+  (lambda (fieldname record)
+    (vector-ref record (get-field-index fieldname fields))))
+
 (define get
   (lambda (fieldname record)
-    (let ((fields (current-fields)))
-      (vector-ref record (get-field-index fieldname fields)))))
+    ((get-with-these-fields (current-fields)) fieldname record)))
 
-(define blank-record
-  (lambda ()
-    (make-vector (length (current-fields)) #f)))
+(define (blank-record-with-these-fields fields)
+    (make-vector (length fields) #f))
+
+(define (blank-record)
+  (blank-record-with-these-fields (current-fields)))
+
+(define (record-set-with-these-fields! fields)
+  (lambda (fieldname record value)
+      (update-field record (get-field-index fieldname fields) value)))
 
 ;; NOTE: Just created an adapter to incorporate the suggested interface into
 ;; my first implementation.
 (define record-set!
   (lambda (fieldname record value)
-    (let ((fields (current-fields)))
-      (update-field record (get-field-index fieldname fields) value))))
+    ((record-set-with-these-fields! (current-fields)) fieldname record value)))
+
 
 (define (sort-db predicate)
   ;; Access record list from db
@@ -249,3 +260,22 @@
   (lambda (fieldname)
     (sort-db (lambda (r1 r2) (generic-before? (get fieldname r1)
                                              (get fieldname r2))))))
+
+(define (add-field-to-record fieldname default-value record)
+  (letrec ((new-fields (cons fieldname (current-fields)))
+           (new-record (blank-record-with-these-fields new-fields)))
+    ((record-set-with-these-fields! new-fields) fieldname new-record default-value)
+    (for-each (lambda (field)
+                ((record-set-with-these-fields! new-fields)
+                 field new-record (get field record)))
+           (current-fields))
+    new-record))
+
+(define add-field
+  (lambda (fieldname default-value)
+    (let ((new-fields (cons fieldname (current-fields)))
+          (new-records (map (lambda (record)
+                              (add-field-to-record fieldname default-value record))
+                            (current-records))))
+      (db-set-fields! (current-db) new-fields)
+      (db-set-records! (current-db) new-records))))
