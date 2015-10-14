@@ -6,6 +6,7 @@
 (provide for-each-with-index
          one-based-index-valid?
          delete-if-exists
+         save-wrapper
          sort-mod
          sent-before?)
 
@@ -29,6 +30,12 @@
   (if (file-exists? name)
       (delete-file name)
       void))
+
+(define (save-wrapper filename fn)
+  (delete-if-exists filename)
+  (let ((port (open-output-file filename)))
+    (fn port)
+    (close-output-port port)))
 
 (define rember
   (lambda (needle haystack)

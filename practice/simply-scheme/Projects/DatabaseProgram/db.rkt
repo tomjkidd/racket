@@ -32,7 +32,8 @@
          generic-before?
          sort-on
 
-         add-field)
+         add-field
+         save-selection)
 
 ;; Current Database (state)
 (define current-state (vector #f))
@@ -179,17 +180,15 @@
                 (display " is not a valid record")
                 (newline)))))
 
-(define save-db
-  (lambda ()
-    (delete-if-exists (db-filename (current-db)))
-    (let ((port (open-output-file (db-filename (current-db)))))
-      (write (db-filename (current-db)) port)
-      (newline port)
-      (write (db-fields (current-db)) port)
-      (newline port)
-      (write (db-records (current-db)) port)
-      (newline port)
-      (close-output-port port))))
+(define (save-db)
+  (save-wrapper (db-filename (current-db))
+                (lambda (port)
+                  (write (db-filename (current-db)) port)
+                  (newline port)
+                  (write (db-fields (current-db)) port)
+                  (newline port)
+                  (write (db-records (current-db)) port)
+                  (newline port))))
 
 (define load-db
   (lambda (filename)
@@ -279,3 +278,9 @@
                             (current-records))))
       (db-set-fields! (current-db) new-fields)
       (db-set-records! (current-db) new-records))))
+
+(define (save-selection filename)
+  (save-wrapper filename
+                (lambda (port)
+                  (write (db-records (current-db)) port)
+                  (newline port))))

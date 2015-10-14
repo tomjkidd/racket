@@ -105,3 +105,6 @@ blank
 (add-field 'category 'rock)
 (list-db)
 (newline)
+
+(save-selection "albums-with-rock")
+(save-db)
