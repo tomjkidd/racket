@@ -6,7 +6,10 @@
 (provide for-each-with-index
          one-based-index-valid?
          delete-if-exists
+         file-copy
          save-wrapper
+         load-wrapper
+         print-file-helper
          sort-mod
          sent-before?)
 
@@ -31,11 +34,42 @@
       (delete-file name)
       void))
 
+(define (file-op-wrapper filename open-fn proc-fn close-fn)
+  (let ((port (open-fn filename)))
+    (proc-fn port)
+    (close-fn port)))
+
 (define (save-wrapper filename fn)
   (delete-if-exists filename)
-  (let ((port (open-output-file filename)))
-    (fn port)
-    (close-output-port port)))
+  (file-op-wrapper filename open-output-file fn close-output-port))
+
+(define (load-wrapper filename fn)
+  (file-op-wrapper filename open-input-file fn close-input-port))
+
+(define (print-file-helper port)
+  (let ((stuff (read-string port)))
+    (if (eof-object? stuff)
+        void
+        (begin (show stuff)
+               (print-file-helper port)))))
+
+(define (copy-lines inport outport)
+  (copy-lines-helper inport outport))
+
+(define (copy-lines-helper inport outport)
+  (let ((line (read-string inport)))
+    (if (eof-object? line)
+        void
+        (begin
+          (show line outport)
+          (copy-lines-helper inport outport)))))
+
+(define (file-copy src-filename target-filename)
+  (load-wrapper src-filename
+                (lambda (inport)
+                  (save-wrapper target-filename
+                                (lambda (outport)
+                                  (copy-lines inport outport))))))
 
 (define rember
   (lambda (needle haystack)

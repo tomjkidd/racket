@@ -284,3 +284,18 @@
                 (lambda (port)
                   (write (db-records (current-db)) port)
                   (newline port))))
+
+#|(define (read-db-from-disk db-name)
+
+
+(define (merge-db other-name common-field)
+  (let ((other-db (read-db-from-disk other-name))
+        (original-fields (current-fields)))
+    (set-current-fields (merge-fields original-fields)
+                        (db-fields other-db))
+    (set-current-records! (merge-db-helper original-fields
+                                           (current-records)
+                                           (db-fields other-db)
+                                           (db-records other-db)
+                                           common-field))))|#
+  

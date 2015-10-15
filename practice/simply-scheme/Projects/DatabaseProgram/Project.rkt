@@ -108,3 +108,5 @@ blank
 
 (save-selection "albums-with-rock")
 (save-db)
+
+(file-copy "load-wrapper-test" "save-wrapper-test")
